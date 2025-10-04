@@ -34,22 +34,20 @@ export function SiteSidebar() {
         <SidebarMenu>
           {menuItems.map(({ href, label, icon: Icon }) => (
             <SidebarMenuItem key={href}>
-              <Link href={href} legacyBehavior passHref>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === href}
-                  tooltip={{
-                    children: label,
-                    className: "font-headline"
-                  }}
-                  className={cn(pathname === href && "font-bold")}
-                >
-                  <a>
-                    <Icon />
-                    <span>{label}</span>
-                  </a>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === href}
+                tooltip={{
+                  children: label,
+                  className: "font-headline"
+                }}
+                className={cn(pathname === href && "font-bold")}
+              >
+                <Link href={href}>
+                  <Icon />
+                  <span>{label}</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
