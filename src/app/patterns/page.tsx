@@ -22,14 +22,14 @@ export default function PatternsPage() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-headline">Pattern Library</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Schnittmuster-Bibliothek</h1>
           <p className="text-muted-foreground">
-            Browse and manage your collection of sewing patterns.
+            Durchsuche und verwalte deine Sammlung von Schnittmustern.
           </p>
         </div>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Pattern
+          Schnittmuster hinzufügen
         </Button>
       </div>
 
@@ -38,11 +38,11 @@ export default function PatternsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search patterns..." className="pl-8" />
+              <Input placeholder="Schnittmuster suchen..." className="pl-8" />
             </div>
             <Select>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by category" />
+                <SelectValue placeholder="Nach Kategorie filtern" />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map(category => (
@@ -52,7 +52,7 @@ export default function PatternsPage() {
             </Select>
             <Select>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by fabric" />
+                <SelectValue placeholder="Nach Stoff filtern" />
               </SelectTrigger>
               <SelectContent>
                 {FABRICS.map(fabric => (
@@ -62,7 +62,7 @@ export default function PatternsPage() {
             </Select>
              <Select>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by creator" />
+                <SelectValue placeholder="Nach Designer filtern" />
               </SelectTrigger>
               <SelectContent>
                 {CREATORS.map(creator => (

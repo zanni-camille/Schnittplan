@@ -15,14 +15,14 @@ export default function CreatorsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-headline">Creators</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Designer</h1>
           <p className="text-muted-foreground">
-            Manage your favorite pattern creators and brands.
+            Verwalte deine Lieblings-Schnittmuster-Designer und -Marken.
           </p>
         </div>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Creator
+          Designer hinzufügen
         </Button>
       </div>
 
@@ -43,7 +43,7 @@ export default function CreatorsPage() {
                 <Button variant="ghost" asChild className="text-muted-foreground">
                   <Link href={creator.url} target="_blank" rel="noopener noreferrer">
                     <Globe className="mr-2 h-4 w-4" />
-                    Visit Website
+                    Webseite besuchen
                   </Link>
                 </Button>
               )}

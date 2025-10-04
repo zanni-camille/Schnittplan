@@ -16,10 +16,10 @@ import { LayoutDashboard, FolderKanban, Scissors, Users, Settings } from "lucide
 import { cn } from "@/lib/utils";
 
 const menuItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/projects", label: "Projects", icon: FolderKanban },
-  { href: "/patterns", label: "Patterns", icon: Scissors },
-  { href: "/creators", label: "Creators", icon: Users },
+  { href: "/", label: "Übersicht", icon: LayoutDashboard },
+  { href: "/projects", label: "Projekte", icon: FolderKanban },
+  { href: "/patterns", label: "Schnittmuster", icon: Scissors },
+  { href: "/creators", label: "Designer", icon: Users },
 ];
 
 export function SiteSidebar() {
@@ -57,9 +57,9 @@ export function SiteSidebar() {
       <SidebarFooter>
          <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton tooltip={{children: "Settings", className: "font-headline"}}>
+                <SidebarMenuButton tooltip={{children: "Einstellungen", className: "font-headline"}}>
                     <Settings />
-                    <span>Settings</span>
+                    <span>Einstellungen</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
          </SidebarMenu>

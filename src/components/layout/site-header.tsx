@@ -37,9 +37,9 @@ export function SiteHeader() {
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src="https://picsum.photos/seed/avatar/100/100"
-                      alt="User Avatar"
+                      alt="Benutzer-Avatar"
                     />
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarFallback>B</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -47,7 +47,7 @@ export function SiteHeader() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      Username
+                      Benutzername
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       user@example.com
@@ -55,10 +55,10 @@ export function SiteHeader() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem>Profil</DropdownMenuItem>
+                <DropdownMenuItem>Einstellungen</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Log out</DropdownMenuItem>
+                <DropdownMenuItem>Abmelden</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </nav>

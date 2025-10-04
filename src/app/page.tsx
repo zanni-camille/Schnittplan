@@ -22,27 +22,27 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">
-            Dashboard
+            Übersicht
           </h1>
           <p className="text-muted-foreground">
-            Welcome back! Here's an overview of your creative world.
+            Willkommen zurück! Hier ist eine Übersicht deiner kreativen Welt.
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Pattern
+            Schnittmuster hinzufügen
           </Button>
           <Button variant="secondary">
             <PlusCircle className="mr-2 h-4 w-4" />
-            New Project
+            Neues Projekt
           </Button>
         </div>
       </div>
 
       <section>
         <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4">
-          Active Projects
+          Aktive Projekte
         </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {activeProjects.map((project) => (
@@ -54,12 +54,12 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="space-y-2">
                   <Progress value={project.progress} />
-                  <p className="text-sm text-muted-foreground">{project.progress}% complete</p>
+                  <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button asChild variant="secondary" className="w-full">
-                  <Link href={`/projects/${project.id}`}>View Project</Link>
+                  <Link href={`/projects/${project.id}`}>Projekt ansehen</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
 
       <section>
         <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4">
-          Recent Patterns
+          Neueste Schnittmuster
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {recentPatterns.map((pattern) => (

@@ -17,14 +17,14 @@ export default function ProjectsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-headline">My Projects</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Meine Projekte</h1>
           <p className="text-muted-foreground">
-            Manage and track your sewing projects.
+            Verwalte und verfolge deine Nähprojekte.
           </p>
         </div>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Create Project
+          Projekt erstellen
         </Button>
       </div>
 
@@ -37,13 +37,13 @@ export default function ProjectsPage() {
             </CardHeader>
             <CardContent className="flex-grow">
               <div className="space-y-2">
-                <Progress value={project.progress} aria-label={`${project.progress}% complete`} />
-                <p className="text-sm text-muted-foreground">{project.progress}% complete</p>
+                <Progress value={project.progress} aria-label={`${project.progress}% abgeschlossen`} />
+                <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
               </div>
             </CardContent>
             <CardFooter>
               <Button asChild variant="secondary" className="w-full">
-                <Link href={`/projects/${project.id}`}>View Details</Link>
+                <Link href={`/projects/${project.id}`}>Details anzeigen</Link>
               </Button>
             </CardFooter>
           </Card>
