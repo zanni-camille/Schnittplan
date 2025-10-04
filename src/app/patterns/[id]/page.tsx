@@ -17,7 +17,7 @@ import {
   CATEGORIES,
   TARGET_GROUPS,
 } from '@/lib/placeholder-data';
-import { ExternalLink, Paperclip, SewingPin, Tag, Users, Fabric } from 'lucide-react';
+import { ExternalLink, Paperclip, Info, Tag, Users, Layers } from 'lucide-react';
 
 export default function PatternDetailPage({
   params,
@@ -88,7 +88,7 @@ export default function PatternDetailPage({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <SewingPin />
+                  <Info />
                   Details
                 </CardTitle>
               </CardHeader>
@@ -110,7 +110,7 @@ export default function PatternDetailPage({
                     </div>
                 </div>
                 <div className="flex items-start gap-2">
-                    <Fabric className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <Layers className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <span className="font-semibold mr-2 shrink-0">Stoffe:</span>
                     <div className="flex flex-wrap gap-2">
                         {fabrics.map((fab) => (
