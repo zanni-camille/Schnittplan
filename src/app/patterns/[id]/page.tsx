@@ -18,7 +18,7 @@ import {
   TARGET_GROUPS,
   PROJECTS,
 } from '@/lib/placeholder-data';
-import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen, FolderKanban } from 'lucide-react';
+import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen, FolderKanban, ArrowLeft, Pen, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 export default function PatternDetailPage({
@@ -39,7 +39,16 @@ export default function PatternDetailPage({
   const relatedProjects = PROJECTS.filter(proj => proj.patternIds.includes(pattern.id));
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <Button asChild variant="ghost">
+            <Link href="/patterns">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Zurück zur Liste
+            </Link>
+        </Button>
+      </div>
+
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-1 space-y-4">
           <Card className="overflow-hidden">
@@ -55,6 +64,19 @@ export default function PatternDetailPage({
           </Card>
           
           <div className="space-y-2">
+             <div className="flex gap-2">
+                <Button asChild variant="secondary" className="flex-1">
+                    <Link href={`/patterns/${pattern.id}/edit`}>
+                        <Pen className="mr-2 h-4 w-4" />
+                        Bearbeiten
+                    </Link>
+                </Button>
+                <Button variant="destructive" size="icon">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Löschen</span>
+                </Button>
+             </div>
+
             {pattern.url && (
               <Button asChild className="w-full">
                 <Link href={pattern.url} target="_blank" rel="noopener noreferrer">
