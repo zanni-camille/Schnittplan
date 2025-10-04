@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PATTERNS, CATEGORIES, FABRICS, CREATORS } from '@/lib/placeholder-data';
-import { PlusCircle, Search } from 'lucide-react';
+import { PlusCircle, Search, Eye, Pen } from 'lucide-react';
 
 export default function PatternsPage() {
   return (
@@ -89,6 +89,18 @@ export default function PatternsPage() {
                       className="object-cover transition-transform group-hover:scale-105"
                       data-ai-hint={pattern.imageHint}
                     />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                      <Button variant="secondary" size="icon" asChild>
+                        <Link href={`/patterns/${pattern.id}`}>
+                          <Eye />
+                        </Link>
+                      </Button>
+                      <Button variant="secondary" size="icon" asChild>
+                         <Link href={`/patterns/${pattern.id}/edit`}>
+                          <Pen />
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter className="p-4 flex-col items-start">

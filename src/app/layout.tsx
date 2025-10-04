@@ -7,7 +7,7 @@ import { SiteSidebar } from '@/components/layout/site-sidebar';
 import { SiteHeader } from '@/components/layout/site-header';
 
 export const metadata: Metadata = {
-  title: 'PatternPad',
+  title: 'SchnittPlan',
   description: 'Deine persönliche Schnittmuster-Bibliothek und Projekt-Tracker.',
 };
 

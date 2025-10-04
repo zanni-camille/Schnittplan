@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PROJECTS, PATTERNS } from '@/lib/placeholder-data';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Eye, Pen } from 'lucide-react';
 
 export default function DashboardPage() {
   const activeProjects = PROJECTS.slice(0, 3);
@@ -57,9 +57,18 @@ export default function DashboardPage() {
                   <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="gap-2">
+                <Button asChild className="w-full">
+                  <Link href={`/projects/${project.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Öffnen
+                  </Link>
+                </Button>
                 <Button asChild variant="secondary" className="w-full">
-                  <Link href={`/projects/${project.id}`}>Projekt ansehen</Link>
+                  <Link href={`/projects/${project.id}/edit`}>
+                    <Pen className="mr-2 h-4 w-4" />
+                    Bearbeiten
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -73,8 +82,8 @@ export default function DashboardPage() {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {recentPatterns.map((pattern) => (
-            <Link href={`/patterns/${pattern.id}`} key={pattern.id}>
-              <Card className="overflow-hidden transition-transform hover:scale-105 hover:shadow-lg">
+            <Card key={pattern.id} className="overflow-hidden transition-transform hover:scale-105 hover:shadow-lg group">
+              <Link href={`/patterns/${pattern.id}`}>
                 <CardContent className="p-0">
                   <div className="aspect-[3/4] relative">
                     <Image
@@ -84,13 +93,25 @@ export default function DashboardPage() {
                       className="object-cover"
                       data-ai-hint={pattern.imageHint}
                     />
+                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                      <Button variant="secondary" size="icon" asChild>
+                        <Link href={`/patterns/${pattern.id}`}>
+                          <Eye />
+                        </Link>
+                      </Button>
+                      <Button variant="secondary" size="icon" asChild>
+                         <Link href={`/patterns/${pattern.id}/edit`}>
+                          <Pen />
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold truncate">{pattern.title}</h3>
                   </div>
                 </CardContent>
-              </Card>
-            </Link>
+              </Link>
+            </Card>
           ))}
         </div>
       </section>

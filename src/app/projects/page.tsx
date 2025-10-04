@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PROJECTS } from '@/lib/placeholder-data';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Eye, Pen } from 'lucide-react';
 
 export default function ProjectsPage() {
   return (
@@ -41,10 +41,19 @@ export default function ProjectsPage() {
                 <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button asChild variant="secondary" className="w-full">
-                <Link href={`/projects/${project.id}`}>Details anzeigen</Link>
-              </Button>
+            <CardFooter className="gap-2">
+                <Button asChild className="w-full">
+                  <Link href={`/projects/${project.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Öffnen
+                  </Link>
+                </Button>
+                <Button asChild variant="secondary" className="w-full">
+                  <Link href={`/projects/${project.id}/edit`}>
+                    <Pen className="mr-2 h-4 w-4" />
+                    Bearbeiten
+                  </Link>
+                </Button>
             </CardFooter>
           </Card>
         ))}
