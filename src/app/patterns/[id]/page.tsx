@@ -16,8 +16,10 @@ import {
   FABRICS,
   CATEGORIES,
   TARGET_GROUPS,
+  PROJECTS,
 } from '@/lib/placeholder-data';
-import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen } from 'lucide-react';
+import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen, FolderKanban } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 export default function PatternDetailPage({
   params,
@@ -34,6 +36,7 @@ export default function PatternDetailPage({
   const targetGroup = TARGET_GROUPS.find((tg) => tg.id === pattern.targetGroupId);
   const categories = CATEGORIES.filter((c) => pattern.categoryIds.includes(c.id));
   const fabrics = FABRICS.filter((f) => pattern.fabricIds.includes(f.id));
+  const relatedProjects = PROJECTS.filter(proj => proj.patternIds.includes(pattern.id));
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -153,21 +156,29 @@ export default function PatternDetailPage({
               </CardContent>
             </Card>
 
-            {creator?.url && (
+            {relatedProjects.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Über den Designer</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FolderKanban />
+                    Zugehörige Projekte
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Besuchen Sie die Website von {creator.name} für weitere Schnittmuster.
-                  </p>
-                  <Button asChild variant="outline">
-                    <Link href={creator.url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Website besuchen
+                <CardContent className="space-y-4">
+                  {relatedProjects.map((project) => (
+                    <Link href={`/projects/${project.id}`} key={project.id} className="block hover:bg-muted/50 p-4 rounded-lg -m-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold">{project.name}</p>
+                          <p className="text-sm text-muted-foreground truncate max-w-xs">{project.description}</p>
+                        </div>
+                        <div className="w-24 text-right shrink-0">
+                          <p className="text-sm font-medium">{project.progress}%</p>
+                          <Progress value={project.progress} className="h-2 mt-1" />
+                        </div>
+                      </div>
                     </Link>
-                  </Button>
+                  ))}
                 </CardContent>
               </Card>
             )}
