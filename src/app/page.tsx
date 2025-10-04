@@ -95,12 +95,12 @@ export default function DashboardPage() {
                     />
                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
                       <Button variant="secondary" size="icon" asChild>
-                        <Link href={`/patterns/${pattern.id}`}>
+                        <Link href={`/patterns/${pattern.id}`} shallow>
                           <Eye />
                         </Link>
                       </Button>
                       <Button variant="secondary" size="icon" asChild>
-                         <Link href={`/patterns/${pattern.id}/edit`}>
+                         <Link href={`/patterns/${pattern.id}/edit`} shallow>
                           <Pen />
                         </Link>
                       </Button>
