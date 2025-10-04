@@ -106,6 +106,25 @@ export default function PatternDetailPage({
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-semibold mr-2 shrink-0">Designer:</span>
+                    {creator ? (
+                      creator.url ? (
+                        <Button variant="link" size="sm" asChild className="p-0 h-auto">
+                          <Link href={creator.url} target="_blank" rel="noopener noreferrer">
+                            <Badge variant="secondary" className="cursor-pointer hover:bg-primary/20">
+                              {creator.name}
+                            </Badge>
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Badge variant="secondary">{creator.name}</Badge>
+                      )
+                    ) : (
+                      <Badge variant="secondary">Unbekannt</Badge>
+                    )}
+                </div>
+                <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-muted-foreground" />
                     <span className="font-semibold mr-2">Zielgruppe:</span>
                     <Badge variant="secondary">{targetGroup?.name}</Badge>
                 </div>
