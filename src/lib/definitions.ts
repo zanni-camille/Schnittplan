@@ -13,7 +13,8 @@ export type Pattern = {
   imageUrl: string;
   imageHint: string;
   description?: string;
-  pdfUrl?: string;
+  instructionUrl?: string;
+  additionalPdfUrls?: string[];
   targetGroupId: string;
   fabricIds: string[];
   categoryIds: string[];

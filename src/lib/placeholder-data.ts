@@ -70,7 +70,9 @@ export const PATTERNS: Pattern[] = [
     categoryIds: ['cat-1'],
     creatorId: 'cre-1',
     projectId: 'proj-1',
-    url: 'https://example.com/sundress'
+    url: 'https://example.com/sundress',
+    instructionUrl: '/placeholder.pdf',
+    additionalPdfUrls: ['/placeholder.pdf', '/placeholder.pdf']
   },
   {
     id: 'pat-2',
@@ -83,7 +85,8 @@ export const PATTERNS: Pattern[] = [
     categoryIds: ['cat-3'],
     creatorId: 'cre-2',
     projectId: 'proj-1',
-    url: 'https://example.com/linentrousers'
+    url: 'https://example.com/linentrousers',
+    instructionUrl: '/placeholder.pdf'
   },
   {
     id: 'pat-3',

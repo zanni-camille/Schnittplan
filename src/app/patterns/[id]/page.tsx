@@ -17,7 +17,7 @@ import {
   CATEGORIES,
   TARGET_GROUPS,
 } from '@/lib/placeholder-data';
-import { ExternalLink, Paperclip, Info, Tag, Users, Layers } from 'lucide-react';
+import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen } from 'lucide-react';
 
 export default function PatternDetailPage({
   params,
@@ -38,7 +38,7 @@ export default function PatternDetailPage({
   return (
     <div className="max-w-4xl mx-auto">
       <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-1 space-y-6">
+        <div className="md:col-span-1 space-y-4">
           <Card className="overflow-hidden">
             <div className="aspect-[3/4] relative">
               <Image
@@ -51,23 +51,34 @@ export default function PatternDetailPage({
             </div>
           </Card>
           
-          {pattern.url && (
-            <Button asChild className="w-full">
-              <Link href={pattern.url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Muster ansehen
-              </Link>
-            </Button>
-          )}
+          <div className="space-y-2">
+            {pattern.url && (
+              <Button asChild className="w-full">
+                <Link href={pattern.url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Muster ansehen
+                </Link>
+              </Button>
+            )}
 
-          {pattern.pdfUrl && (
-             <Button asChild variant="secondary" className="w-full">
-               <Link href={pattern.pdfUrl} target="_blank" rel="noopener noreferrer">
-                 <Paperclip className="mr-2 h-4 w-4" />
-                 PDF herunterladen
-               </Link>
-             </Button>
-           )}
+            {pattern.instructionUrl && (
+              <Button asChild variant="secondary" className="w-full">
+                <Link href={pattern.instructionUrl} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Anleitung (PDF)
+                </Link>
+              </Button>
+            )}
+
+            {pattern.additionalPdfUrls?.map((pdfUrl, index) => (
+              <Button asChild variant="outline" className="w-full" key={index}>
+                <Link href={pdfUrl} target="_blank" rel="noopener noreferrer">
+                  <Paperclip className="mr-2 h-4 w-4" />
+                  Zusätzliches PDF {index + 1}
+                </Link>
+              </Button>
+            ))}
+          </div>
         </div>
 
         <div className="md:col-span-2 space-y-8">
