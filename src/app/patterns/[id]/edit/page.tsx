@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -59,6 +59,7 @@ type PatternFormValues = z.infer<typeof patternFormSchema>;
 
 export default function PatternEditPage() {
   const params = useParams();
+  const router = useRouter();
   const { id } = params;
   const { toast } = useToast();
 
@@ -91,6 +92,7 @@ export default function PatternEditPage() {
       description: `Schnittmuster "${data.title}" wurde erfolgreich aktualisiert.`,
     });
     console.log(data);
+    router.push(`/patterns/${id}`);
   }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, field: any) => {
