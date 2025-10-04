@@ -39,7 +39,7 @@ export default function PatternDetailPage({
   const relatedProjects = PROJECTS.filter(proj => proj.patternIds.includes(pattern.id));
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div>
         <Button asChild variant="ghost">
             <Link href="/patterns">

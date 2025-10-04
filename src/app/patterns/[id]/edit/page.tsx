@@ -104,7 +104,7 @@ export default function PatternEditPage() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-4xl mx-auto space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="flex justify-between items-center">
             <Button asChild variant="ghost">
                 <Link href={`/patterns/${id}`}>
@@ -359,7 +359,9 @@ export default function PatternEditPage() {
                                 <div className="flex gap-2">
                                 <div className="flex-grow">
                                   <FormControl>
+                                    <div>
                                       <Input placeholder="Keine Datei ausgewählt" value={field.value || ''} readOnly />
+                                    </div>
                                   </FormControl>
                                   <input type="file" ref={instructionPdfInputRef} className="hidden" accept=".pdf" onChange={(e) => handleFileSelect(e, field)} />
                                 </div>
@@ -386,7 +388,9 @@ export default function PatternEditPage() {
                                             <div className="flex items-center gap-2">
                                                 <div className="flex-grow">
                                                   <FormControl>
+                                                    <div>
                                                       <Input {...formField} placeholder={`Keine Datei ausgewählt`} readOnly />
+                                                    </div>
                                                   </FormControl>
                                                   <input
                                                     type="file"
