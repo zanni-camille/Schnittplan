@@ -357,12 +357,12 @@ export default function PatternEditPage() {
                             <FormItem>
                                 <FormLabel>Anleitung (PDF)</FormLabel>
                                 <div className="flex gap-2">
-                                <FormControl>
-                                  <>
-                                    <Input placeholder="Keine Datei ausgewählt" value={field.value || ''} readOnly />
-                                    <input type="file" ref={instructionPdfInputRef} className="hidden" accept=".pdf" onChange={(e) => handleFileSelect(e, field)} />
-                                  </>
-                                </FormControl>
+                                <div className="flex-grow">
+                                  <FormControl>
+                                      <Input placeholder="Keine Datei ausgewählt" value={field.value || ''} readOnly />
+                                  </FormControl>
+                                  <input type="file" ref={instructionPdfInputRef} className="hidden" accept=".pdf" onChange={(e) => handleFileSelect(e, field)} />
+                                </div>
                                 <Button type="button" variant="outline" onClick={() => instructionPdfInputRef.current?.click()}>
                                     <Upload className="mr-2 h-4 w-4" />
                                     Hochladen
@@ -384,18 +384,18 @@ export default function PatternEditPage() {
                                     render={({ field: formField }) => (
                                         <FormItem>
                                             <div className="flex items-center gap-2">
-                                                <FormControl>
-                                                  <>
-                                                    <Input {...formField} placeholder={`Keine Datei ausgewählt`} readOnly />
-                                                    <input
-                                                      type="file"
-                                                      ref={(el) => (additionalPdfInputRefs.current[index] = el)}
-                                                      className="hidden"
-                                                      accept=".pdf"
-                                                      onChange={(e) => handleFileSelect(e, formField)}
-                                                    />
-                                                  </>
-                                                </FormControl>
+                                                <div className="flex-grow">
+                                                  <FormControl>
+                                                      <Input {...formField} placeholder={`Keine Datei ausgewählt`} readOnly />
+                                                  </FormControl>
+                                                  <input
+                                                    type="file"
+                                                    ref={(el) => (additionalPdfInputRefs.current[index] = el)}
+                                                    className="hidden"
+                                                    accept=".pdf"
+                                                    onChange={(e) => handleFileSelect(e, formField)}
+                                                  />
+                                                </div>
                                                 <Button type="button" variant="outline" size="icon" onClick={() => additionalPdfInputRefs.current[index]?.click()}>
                                                   <Upload className="h-4 w-4" />
                                                 </Button>
