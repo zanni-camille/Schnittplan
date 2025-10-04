@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "pattern-1",
+      "description": "A stylish summer dress pattern.",
+      "imageUrl": "https://images.unsplash.com/photo-1744502671977-702d9105533d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkcmVzcyUyMHNld2luZ3xlbnwwfHx8fDE3NTk1Njc3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dress sewing"
+    },
+    {
+      "id": "pattern-2",
+      "description": "A comfortable pair of linen trousers.",
+      "imageUrl": "https://images.unsplash.com/photo-1625479144604-ae69462778b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx0cm91c2VycyUyMHNld2luZ3xlbnwwfHx8fDE3NTk1Njc3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "trousers sewing"
+    },
+    {
+      "id": "pattern-3",
+      "description": "A classic button-up shirt pattern.",
+      "imageUrl": "https://images.unsplash.com/photo-1685270066079-174f54796e3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzaGlydCUyMGZhYnJpY3xlbnwwfHx8fDE3NTk1Njc3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "shirt fabric"
+    },
+    {
+      "id": "pattern-4",
+      "description": "A cozy knitted sweater design.",
+      "imageUrl": "https://images.unsplash.com/photo-1645957309498-a83793c0f647?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxrbml0dGluZyUyMHdvb2x8ZW58MHx8fHwxNzU5NTY3NzA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "knitting wool"
+    },
+    {
+      "id": "pattern-5",
+      "description": "A-line skirt for beginners.",
+      "imageUrl": "https://images.unsplash.com/photo-1553096763-6fb9cdc4df14?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxza2lydCUyMHBhdHRlcm58ZW58MHx8fHwxNzU5NTY3NzA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "skirt pattern"
+    },
+    {
+      "id": "pattern-6",
+      "description": "Children's pajama set pattern.",
+      "imageUrl": "https://images.unsplash.com/photo-1759408174266-8b11788dff30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwYWphbWFzJTIwa2lkc3xlbnwwfHx8fDE3NTk1Njc3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pajamas kids"
+    },
+    {
+      "id": "pattern-7",
+      "description": "Elegant evening gown with intricate details.",
+      "imageUrl": "https://images.unsplash.com/photo-1567290290527-b553f4d97960?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxldmVuaW5nJTIwZ293bnxlbnwwfHx8fDE3NTk1MjUwNjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "evening gown"
+    },
+    {
+      "id": "pattern-8",
+      "description": "Versatile tote bag pattern.",
+      "imageUrl": "https://images.unsplash.com/photo-1621466550398-ac8062907657?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx0b3RlJTIwYmFnfGVufDB8fHx8MTc1OTQ3NTAzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tote bag"
+    }
+  ]
 }

@@ -1,0 +1,54 @@
+import Link from 'next/link';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { PROJECTS } from '@/lib/placeholder-data';
+import { PlusCircle } from 'lucide-react';
+
+export default function ProjectsPage() {
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">My Projects</h1>
+          <p className="text-muted-foreground">
+            Manage and track your sewing projects.
+          </p>
+        </div>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Create Project
+        </Button>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {PROJECTS.map((project) => (
+          <Card key={project.id} className="flex flex-col">
+            <CardHeader>
+              <CardTitle>{project.name}</CardTitle>
+              <CardDescription>{project.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow">
+              <div className="space-y-2">
+                <Progress value={project.progress} aria-label={`${project.progress}% complete`} />
+                <p className="text-sm text-muted-foreground">{project.progress}% complete</p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button asChild variant="secondary" className="w-full">
+                <Link href={`/projects/${project.id}`}>View Details</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
