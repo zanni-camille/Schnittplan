@@ -79,7 +79,7 @@ export default function PatternsPage() {
           const creator = CREATORS.find(c => c.id === pattern.creatorId);
           return (
             <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
-              <Link href={`/patterns/${pattern.id}`}>
+              <Link href={`/patterns/${pattern.id}`} className="block">
                 <CardContent className="p-0">
                   <div className="aspect-[3/4] relative">
                     <Image

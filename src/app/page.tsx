@@ -83,7 +83,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {recentPatterns.map((pattern) => (
             <Card key={pattern.id} className="overflow-hidden transition-transform hover:scale-105 hover:shadow-lg group">
-              <Link href={`/patterns/${pattern.id}`}>
+              <Link href={`/patterns/${pattern.id}`} className="block">
                 <CardContent className="p-0">
                   <div className="aspect-[3/4] relative">
                     <Image
