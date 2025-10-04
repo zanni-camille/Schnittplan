@@ -41,6 +41,7 @@ import {
 } from '@/lib/placeholder-data';
 import { ArrowLeft, Save, Upload, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useRef } from 'react';
 
 const patternFormSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -60,6 +61,10 @@ export default function PatternEditPage() {
   const params = useParams();
   const { id } = params;
   const { toast } = useToast();
+
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const instructionPdfInputRef = useRef<HTMLInputElement>(null);
+  const additionalPdfInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const pattern = PATTERNS.find((p) => p.id === id);
 
@@ -87,6 +92,13 @@ export default function PatternEditPage() {
     });
     console.log(data);
   }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      field.onChange(file.name);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -116,10 +128,23 @@ export default function PatternEditPage() {
                         data-ai-hint={pattern.imageHint}
                     />
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button type="button">
+                        <Button type="button" onClick={() => imageInputRef.current?.click()}>
                             <Upload className="mr-2 h-4 w-4" />
                             Bild ändern
                         </Button>
+                        <input
+                          type="file"
+                          ref={imageInputRef}
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // Here you would handle the image upload/preview
+                              console.log("Selected image:", file.name);
+                            }
+                          }}
+                        />
                     </div>
                 </div>
             </Card>
@@ -331,9 +356,12 @@ export default function PatternEditPage() {
                                 <FormLabel>Anleitung (PDF)</FormLabel>
                                 <div className="flex gap-2">
                                 <FormControl>
-                                    <Input placeholder="PDF-Datei auswählen..." value={field.value || ''} readOnly />
+                                  <>
+                                    <Input placeholder="Keine Datei ausgewählt" value={field.value || ''} readOnly />
+                                    <input type="file" ref={instructionPdfInputRef} className="hidden" accept=".pdf" onChange={(e) => handleFileSelect(e, field)} />
+                                  </>
                                 </FormControl>
-                                <Button type="button" variant="outline">
+                                <Button type="button" variant="outline" onClick={() => instructionPdfInputRef.current?.click()}>
                                     <Upload className="mr-2 h-4 w-4" />
                                     Hochladen
                                 </Button>
@@ -351,12 +379,24 @@ export default function PatternEditPage() {
                                     key={field.id}
                                     control={form.control}
                                     name={`additionalPdfUrls.${index}.value`}
-                                    render={({ field }) => (
+                                    render={({ field: formField }) => (
                                         <FormItem>
                                             <div className="flex items-center gap-2">
                                                 <FormControl>
-                                                    <Input {...field} placeholder={`Zusätzliches PDF ${index + 1}`} />
+                                                  <>
+                                                    <Input {...formField} placeholder={`Keine Datei ausgewählt`} readOnly />
+                                                    <input
+                                                      type="file"
+                                                      ref={(el) => (additionalPdfInputRefs.current[index] = el)}
+                                                      className="hidden"
+                                                      accept=".pdf"
+                                                      onChange={(e) => handleFileSelect(e, formField)}
+                                                    />
+                                                  </>
                                                 </FormControl>
+                                                <Button type="button" variant="outline" size="icon" onClick={() => additionalPdfInputRefs.current[index]?.click()}>
+                                                  <Upload className="h-4 w-4" />
+                                                </Button>
                                                 <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                                                     <Trash2 className="h-4 w-4 text-destructive"/>
                                                 </Button>
