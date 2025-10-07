@@ -44,7 +44,7 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4">
           Aktive Projekte
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
           {activeProjects.map((project) => (
             <Card key={project.id}>
               <CardHeader>
