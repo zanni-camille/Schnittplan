@@ -189,12 +189,12 @@ export default function PatternDetailPage({
                 <CardContent className="space-y-4">
                   {relatedProjects.map((project) => (
                     <Link href={`/projects/${project.id}`} key={project.id} className="block hover:bg-muted/50 p-4 rounded-lg -m-4">
-                      <div className="flex justify-between items-start">
-                        <div>
+                      <div className="flex flex-wrap justify-between items-start gap-x-4">
+                        <div className="flex-grow">
                           <p className="font-semibold">{project.name}</p>
                           <p className="text-sm text-muted-foreground truncate max-w-xs">{project.description}</p>
                         </div>
-                        <div className="w-24 text-right shrink-0">
+                        <div className="w-24 text-right shrink-0 mt-2 sm:mt-0">
                           <p className="text-sm font-medium">{project.progress}%</p>
                           <Progress value={project.progress} className="h-2 mt-1" />
                         </div>
