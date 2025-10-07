@@ -26,7 +26,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -356,20 +355,16 @@ export default function PatternEditPage() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Anleitung (PDF)</FormLabel>
-                                <div className="flex gap-2">
-                                <div className="flex-grow">
-                                  <FormControl>
-                                    <div>
-                                      <Input placeholder="Keine Datei ausgewählt" value={field.value || ''} readOnly />
-                                    </div>
-                                  </FormControl>
-                                  <input type="file" ref={instructionPdfInputRef} className="hidden" accept=".pdf" onChange={(e) => handleFileSelect(e, field)} />
-                                </div>
-                                <Button type="button" variant="outline" onClick={() => instructionPdfInputRef.current?.click()}>
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    Hochladen
-                                </Button>
-                                </div>
+                                <FormControl>
+                                  <div className="flex gap-2">
+                                    <Input placeholder="Keine Datei ausgewählt" value={field.value || ''} readOnly />
+                                    <Button type="button" variant="outline" onClick={() => instructionPdfInputRef.current?.click()}>
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Hochladen
+                                    </Button>
+                                  </div>
+                                </FormControl>
+                                <input type="file" ref={instructionPdfInputRef} className="hidden" accept=".pdf" onChange={(e) => handleFileSelect(e, field)} />
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -385,28 +380,24 @@ export default function PatternEditPage() {
                                     name={`additionalPdfUrls.${index}.value`}
                                     render={({ field: formField }) => (
                                         <FormItem>
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex-grow">
-                                                  <FormControl>
-                                                    <div>
-                                                      <Input {...formField} placeholder={`Keine Datei ausgewählt`} readOnly />
-                                                    </div>
-                                                  </FormControl>
-                                                  <input
-                                                    type="file"
-                                                    ref={(el) => (additionalPdfInputRefs.current[index] = el)}
-                                                    className="hidden"
-                                                    accept=".pdf"
-                                                    onChange={(e) => handleFileSelect(e, formField)}
-                                                  />
-                                                </div>
+                                            <FormControl>
+                                              <div className="flex items-center gap-2">
+                                                <Input {...formField} placeholder={`Keine Datei ausgewählt`} readOnly />
                                                 <Button type="button" variant="outline" size="icon" onClick={() => additionalPdfInputRefs.current[index]?.click()}>
                                                   <Upload className="h-4 w-4" />
                                                 </Button>
                                                 <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                                                     <Trash2 className="h-4 w-4 text-destructive"/>
                                                 </Button>
-                                            </div>
+                                              </div>
+                                            </FormControl>
+                                             <input
+                                                type="file"
+                                                ref={(el) => (additionalPdfInputRefs.current[index] = el)}
+                                                className="hidden"
+                                                accept=".pdf"
+                                                onChange={(e) => handleFileSelect(e, formField)}
+                                              />
                                              <FormMessage />
                                         </FormItem>
                                     )}
