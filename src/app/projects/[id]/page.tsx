@@ -64,9 +64,11 @@ export default function ProjectDetailPage() {
             </Link>
         </Button>
         <div className="flex items-center gap-2">
-            <Button variant="secondary">
-                <Pen className="mr-2 h-4 w-4" />
-                Projekt bearbeiten
+            <Button variant="secondary" asChild>
+                <Link href={`/projects/${id}/edit`}>
+                    <Pen className="mr-2 h-4 w-4" />
+                    Projekt bearbeiten
+                </Link>
             </Button>
              <AlertDialog>
               <AlertDialogTrigger asChild>
