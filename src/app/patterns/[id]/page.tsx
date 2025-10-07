@@ -1,6 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -20,17 +22,41 @@ import {
 } from '@/lib/placeholder-data';
 import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen, FolderKanban, ArrowLeft, Pen, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
 
 export default function PatternDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const router = useRouter();
+  const { toast } = useToast();
   const pattern = PATTERNS.find((p) => p.id === params.id);
 
   if (!pattern) {
     notFound();
   }
+
+  const handleDelete = () => {
+    // Here you would typically call an API to delete the pattern.
+    console.log(`Deleting pattern ${pattern.id}`);
+    toast({
+      title: 'Schnittmuster gelöscht',
+      description: `"${pattern.title}" wurde erfolgreich entfernt.`,
+    });
+    router.push('/patterns');
+  };
 
   const creator = CREATORS.find((c) => c.id === pattern.creatorId);
   const targetGroup = TARGET_GROUPS.find((tg) => tg.id === pattern.targetGroupId);
@@ -71,10 +97,28 @@ export default function PatternDetailPage({
                         Bearbeiten
                     </Link>
                 </Button>
-                <Button variant="destructive" size="icon">
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Löschen</span>
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Löschen</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Bist du sicher?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Schnittmuster "{pattern.title}" dauerhaft gelöscht.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>
+                        Löschen
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
              </div>
 
             {pattern.url && (
