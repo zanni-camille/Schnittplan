@@ -46,10 +46,21 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4">
           Aktive Projekte
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {activeProjects.map((project) => (
-            <Card key={project.id}>
-              <Link href={`/projects/${project.id}`}>
+            <Card key={project.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
+              <Link href={`/projects/${project.id}`} className="block h-full">
+                {project.imageUrl && (
+                    <div className="relative aspect-video">
+                        <Image 
+                            src={project.imageUrl}
+                            alt={project.name}
+                            fill
+                            className="object-cover transition-transform group-hover:scale-105"
+                            data-ai-hint={project.imageHint}
+                        />
+                    </div>
+                )}
                 <CardHeader>
                   <CardTitle>{project.name}</CardTitle>
                   <CardDescription className="truncate">{project.description}</CardDescription>

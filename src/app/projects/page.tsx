@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Card,
   CardContent,
@@ -28,13 +29,24 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {PROJECTS.map((project) => (
-          <Card key={project.id} className="flex flex-col">
-            <Link href={`/projects/${project.id}`}>
+          <Card key={project.id} className="flex flex-col overflow-hidden group transition-shadow hover:shadow-xl">
+            <Link href={`/projects/${project.id}`} className="flex flex-col h-full">
+              {project.imageUrl && (
+                <div className="relative aspect-video">
+                  <Image
+                    src={project.imageUrl}
+                    alt={project.name}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                    data-ai-hint={project.imageHint}
+                  />
+                </div>
+              )}
               <CardHeader>
                 <CardTitle>{project.name}</CardTitle>
-                <CardDescription>{project.description}</CardDescription>
+                <CardDescription className="line-clamp-2">{project.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
                 <div className="space-y-2">

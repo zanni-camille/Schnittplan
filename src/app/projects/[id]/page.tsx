@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { PROJECTS, PATTERNS } from '@/lib/placeholder-data';
-import { ArrowLeft, Pen, Trash2, Scissors } from 'lucide-react';
+import { ArrowLeft, Pen, Trash2, Scissors, CalendarCheck } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +28,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -90,51 +93,89 @@ export default function ProjectDetailPage() {
         </div>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-4xl">{project.name}</CardTitle>
-          <CardDescription className="text-lg">{project.description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Fortschritt: {project.progress}%</h3>
-            <Progress value={project.progress} />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid md:grid-cols-3 gap-8 items-start">
+        <div className="md:col-span-1 space-y-6">
+          {project.imageUrl && (
+            <Card className="overflow-hidden">
+              <div className="aspect-video relative">
+                <Image
+                  src={project.imageUrl}
+                  alt={project.name}
+                  fill
+                  className="object-cover"
+                  data-ai-hint={project.imageHint}
+                />
+              </div>
+            </Card>
+          )}
+          {project.completionDates && project.completionDates.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <CalendarCheck />
+                  Fertigstellungen
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  {project.completionDates.map((date, index) => (
+                    <Badge key={index} variant="secondary" className="text-sm">
+                      Teil {index + 1}: {format(new Date(date), 'dd. MMMM yyyy', { locale: de })}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+        <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline text-4xl">{project.name}</CardTitle>
+              <CardDescription className="text-lg">{project.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground">Fortschritt: {project.progress}%</h3>
+                <Progress value={project.progress} />
+              </div>
+            </CardContent>
+          </Card>
 
-      <section>
-        <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4 flex items-center gap-2">
-          <Scissors />
-          Zugehörige Schnittmuster
-        </h2>
-        {relatedPatterns.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {relatedPatterns.map((pattern) => (
-              <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
-                <Link href={`/patterns/${pattern.id}`} className="block">
-                  <CardContent className="p-0">
-                    <div className="aspect-[3/4] relative">
-                      <Image
-                        src={pattern.imageUrl}
-                        alt={pattern.title}
-                        fill
-                        className="object-cover transition-transform group-hover:scale-105"
-                        data-ai-hint={pattern.imageHint}
-                      />
-                    </div>
-                  </CardContent>
-                  <div className="p-4">
-                      <h3 className="font-semibold truncate w-full">{pattern.title}</h3>
-                  </div>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted-foreground">Diesem Projekt sind keine Schnittmuster zugeordnet.</p>
-        )}
-      </section>
+          <section>
+            <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4 flex items-center gap-2">
+              <Scissors />
+              Zugehörige Schnittmuster
+            </h2>
+            {relatedPatterns.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {relatedPatterns.map((pattern) => (
+                  <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
+                    <Link href={`/patterns/${pattern.id}`} className="block">
+                      <CardContent className="p-0">
+                        <div className="aspect-[3/4] relative">
+                          <Image
+                            src={pattern.imageUrl}
+                            alt={pattern.title}
+                            fill
+                            className="object-cover transition-transform group-hover:scale-105"
+                            data-ai-hint={pattern.imageHint}
+                          />
+                        </div>
+                      </CardContent>
+                      <div className="p-4">
+                          <h3 className="font-semibold truncate w-full">{pattern.title}</h3>
+                      </div>
+                    </Link>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Diesem Projekt sind keine Schnittmuster zugeordnet.</p>
+            )}
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
