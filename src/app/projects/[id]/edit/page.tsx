@@ -38,6 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { de } from 'date-fns/locale';
 
 
 const projectFormSchema = z.object({
@@ -144,12 +145,12 @@ export default function ProjectEditPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {imageFields.map((field, index) => (
                     <div key={field.id} className="relative group aspect-video">
-                       <Image
+                       {field.value && <Image
                         src={field.value}
                         alt={`Projektbild ${index + 1}`}
                         fill
                         className="object-cover rounded-md"
-                      />
+                      />}
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                          <Button
                           type="button"
