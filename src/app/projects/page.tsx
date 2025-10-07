@@ -28,24 +28,21 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
         {PROJECTS.map((project) => (
           <Card key={project.id} className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{project.name}</CardTitle>
-              <CardDescription>{project.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <div className="space-y-2">
-                <Progress value={project.progress} aria-label={`${project.progress}% abgeschlossen`} />
-                <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button asChild variant="secondary" className="w-full">
-                <Link href={`/projects/${project.id}`}>Details anzeigen</Link>
-              </Button>
-            </CardFooter>
+            <Link href={`/projects/${project.id}`}>
+              <CardHeader>
+                <CardTitle>{project.name}</CardTitle>
+                <CardDescription>{project.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <div className="space-y-2">
+                  <Progress value={project.progress} aria-label={`${project.progress}% abgeschlossen`} />
+                  <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
+                </div>
+              </CardContent>
+            </Link>
           </Card>
         ))}
       </div>

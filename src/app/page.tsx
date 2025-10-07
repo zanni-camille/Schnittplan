@@ -29,9 +29,11 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Schnittmuster hinzufügen
+          <Button asChild>
+            <Link href="/patterns/new">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Schnittmuster hinzufügen
+            </Link>
           </Button>
           <Button variant="secondary">
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -44,24 +46,21 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4">
           Aktive Projekte
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:grid-cols-3">
           {activeProjects.map((project) => (
             <Card key={project.id}>
-              <CardHeader>
-                <CardTitle>{project.name}</CardTitle>
-                <CardDescription className="truncate">{project.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Progress value={project.progress} />
-                  <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button asChild variant="secondary" className="w-full">
-                  <Link href={`/projects/${project.id}`}>Projekt ansehen</Link>
-                </Button>
-              </CardFooter>
+              <Link href={`/projects/${project.id}`}>
+                <CardHeader>
+                  <CardTitle>{project.name}</CardTitle>
+                  <CardDescription className="truncate">{project.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Progress value={project.progress} />
+                    <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
+                  </div>
+                </CardContent>
+              </Link>
             </Card>
           ))}
         </div>
@@ -73,8 +72,8 @@ export default function DashboardPage() {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {recentPatterns.map((pattern) => (
-            <Link href={`/patterns/${pattern.id}`} key={pattern.id}>
-              <Card className="overflow-hidden transition-transform hover:scale-105 hover:shadow-lg">
+            <Card key={pattern.id} className="overflow-hidden transition-transform hover:scale-105 hover:shadow-lg group">
+              <Link href={`/patterns/${pattern.id}`} className="block">
                 <CardContent className="p-0">
                   <div className="aspect-[3/4] relative">
                     <Image
@@ -89,8 +88,8 @@ export default function DashboardPage() {
                     <h3 className="font-semibold truncate">{pattern.title}</h3>
                   </div>
                 </CardContent>
-              </Card>
-            </Link>
+              </Link>
+            </Card>
           ))}
         </div>
       </section>

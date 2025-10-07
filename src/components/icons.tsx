@@ -8,7 +8,7 @@ export const Icons = {
         <Scissors className="h-5 w-5" />
       </div>
       <span className="font-headline text-lg font-bold text-foreground">
-        PatternPad
+        SchnittPlan
       </span>
     </div>
   ),

@@ -1,6 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -18,19 +20,43 @@ import {
   TARGET_GROUPS,
   PROJECTS,
 } from '@/lib/placeholder-data';
-import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen, FolderKanban } from 'lucide-react';
+import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen, FolderKanban, ArrowLeft, Pen, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
 
 export default function PatternDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const router = useRouter();
+  const { toast } = useToast();
   const pattern = PATTERNS.find((p) => p.id === params.id);
 
   if (!pattern) {
     notFound();
   }
+
+  const handleDelete = () => {
+    // Here you would typically call an API to delete the pattern.
+    console.log(`Deleting pattern ${pattern.id}`);
+    toast({
+      title: 'Schnittmuster gelöscht',
+      description: `"${pattern.title}" wurde erfolgreich entfernt.`,
+    });
+    router.push('/patterns');
+  };
 
   const creator = CREATORS.find((c) => c.id === pattern.creatorId);
   const targetGroup = TARGET_GROUPS.find((tg) => tg.id === pattern.targetGroupId);
@@ -39,7 +65,16 @@ export default function PatternDetailPage({
   const relatedProjects = PROJECTS.filter(proj => proj.patternIds.includes(pattern.id));
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="space-y-6">
+      <div>
+        <Button asChild variant="ghost">
+            <Link href="/patterns">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Zurück zur Liste
+            </Link>
+        </Button>
+      </div>
+
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-1 space-y-4">
           <Card className="overflow-hidden">
@@ -55,6 +90,37 @@ export default function PatternDetailPage({
           </Card>
           
           <div className="space-y-2">
+             <div className="flex gap-2">
+                <Button asChild variant="secondary" className="flex-1">
+                    <Link href={`/patterns/${pattern.id}/edit`}>
+                        <Pen className="mr-2 h-4 w-4" />
+                        Bearbeiten
+                    </Link>
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Löschen</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Bist du sicher?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Schnittmuster "{pattern.title}" dauerhaft gelöscht.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>
+                        Löschen
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+             </div>
+
             {pattern.url && (
               <Button asChild className="w-full">
                 <Link href={pattern.url} target="_blank" rel="noopener noreferrer">
@@ -167,12 +233,12 @@ export default function PatternDetailPage({
                 <CardContent className="space-y-4">
                   {relatedProjects.map((project) => (
                     <Link href={`/projects/${project.id}`} key={project.id} className="block hover:bg-muted/50 p-4 rounded-lg -m-4">
-                      <div className="flex justify-between items-start">
-                        <div>
+                      <div className="flex flex-wrap justify-between items-start gap-x-4">
+                        <div className="flex-grow">
                           <p className="font-semibold">{project.name}</p>
                           <p className="text-sm text-muted-foreground truncate max-w-xs">{project.description}</p>
                         </div>
-                        <div className="w-24 text-right shrink-0">
+                        <div className="w-24 text-right shrink-0 mt-2 sm:mt-0">
                           <p className="text-sm font-medium">{project.progress}%</p>
                           <Progress value={project.progress} className="h-2 mt-1" />
                         </div>
