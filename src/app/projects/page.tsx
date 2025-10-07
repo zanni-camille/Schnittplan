@@ -70,14 +70,14 @@ export default function ProjectsPage() {
         {filteredProjects.map((project) => (
           <Card key={project.id} className="flex flex-col overflow-hidden group transition-shadow hover:shadow-xl">
             <Link href={`/projects/${project.id}`} className="flex flex-col h-full">
-              {project.imageUrl && (
+              {project.imageUrls && project.imageUrls.length > 0 && (
                 <div className="relative aspect-video">
                   <Image
-                    src={project.imageUrl}
+                    src={project.imageUrls[0]}
                     alt={project.name}
                     fill
                     className="object-cover transition-transform group-hover:scale-105"
-                    data-ai-hint={project.imageHint}
+                    data-ai-hint={project.imageHints?.[0]}
                   />
                 </div>
               )}

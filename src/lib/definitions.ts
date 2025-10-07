@@ -5,8 +5,8 @@ export type Project = {
   startDate: string; // ISO date string
   progress: number; // 0-100
   patternIds: string[];
-  imageUrl?: string;
-  imageHint?: string;
+  imageUrls?: string[];
+  imageHints?: string[];
   completionDates?: string[]; // Array of ISO date strings for each piece
 };
 

@@ -39,8 +39,8 @@ export const PROJECTS: Project[] = [
     startDate: '2024-06-01T00:00:00.000Z',
     progress: 75,
     patternIds: ['pat-1', 'pat-2'],
-    imageUrl: 'https://picsum.photos/seed/proj1/800/600',
-    imageHint: 'summer clothes',
+    imageUrls: ['https://picsum.photos/seed/proj1/800/600', 'https://picsum.photos/seed/proj1-2/800/600'],
+    imageHints: ['summer clothes', 'sewing machine'],
     completionDates: ['2024-06-15T00:00:00.000Z'],
   },
   {
@@ -50,8 +50,8 @@ export const PROJECTS: Project[] = [
     startDate: '2024-01-15T00:00:00.000Z',
     progress: 40,
     patternIds: ['pat-4'],
-    imageUrl: 'https://picsum.photos/seed/proj2/800/600',
-    imageHint: 'winter fashion',
+    imageUrls: ['https://picsum.photos/seed/proj2/800/600'],
+    imageHints: ['winter fashion'],
   },
   {
     id: 'proj-3',
@@ -60,8 +60,8 @@ export const PROJECTS: Project[] = [
     startDate: '2024-07-10T00:00:00.000Z',
     progress: 10,
     patternIds: ['pat-6'],
-    imageUrl: 'https://picsum.photos/seed/proj3/800/600',
-    imageHint: 'kids clothes',
+    imageUrls: ['https://picsum.photos/seed/proj3/800/600'],
+    imageHints: ['kids clothes'],
   },
 ];
 

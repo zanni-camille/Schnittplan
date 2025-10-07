@@ -26,6 +26,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -97,18 +104,32 @@ export default function ProjectDetailPage() {
       
       <div className="grid md:grid-cols-3 gap-8 items-start">
         <div className="md:col-span-1 space-y-6">
-          {project.imageUrl && (
-            <Card className="overflow-hidden">
-              <div className="aspect-video relative">
-                <Image
-                  src={project.imageUrl}
-                  alt={project.name}
-                  fill
-                  className="object-cover"
-                  data-ai-hint={project.imageHint}
-                />
-              </div>
-            </Card>
+          {project.imageUrls && project.imageUrls.length > 0 && (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {project.imageUrls.map((url, index) => (
+                  <CarouselItem key={index}>
+                    <Card className="overflow-hidden">
+                      <div className="aspect-video relative">
+                        <Image
+                          src={url}
+                          alt={`${project.name} - Bild ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          data-ai-hint={project.imageHints?.[index]}
+                        />
+                      </div>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {project.imageUrls.length > 1 && (
+                <>
+                  <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+                  <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+                </>
+              )}
+            </Carousel>
           )}
           {project.completionDates && project.completionDates.length > 0 && (
             <Card>
