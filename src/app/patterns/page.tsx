@@ -27,9 +27,11 @@ export default function PatternsPage() {
             Durchsuche und verwalte deine Sammlung von Schnittmustern.
           </p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Schnittmuster hinzufügen
+        <Button asChild>
+          <Link href="/patterns/new">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Schnittmuster hinzufügen
+          </Link>
         </Button>
       </div>
 

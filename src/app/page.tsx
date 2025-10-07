@@ -29,9 +29,11 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Schnittmuster hinzufügen
+          <Button asChild>
+            <Link href="/patterns/new">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Schnittmuster hinzufügen
+            </Link>
           </Button>
           <Button variant="secondary">
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -44,7 +46,7 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4">
           Aktive Projekte
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:grid-cols-3">
           {activeProjects.map((project) => (
             <Card key={project.id}>
               <Link href={`/projects/${project.id}`}>
