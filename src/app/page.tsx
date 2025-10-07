@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PROJECTS, PATTERNS } from '@/lib/placeholder-data';
-import { PlusCircle, Eye, Pen } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 
 export default function DashboardPage() {
   const activeProjects = PROJECTS.slice(0, 3);
@@ -44,33 +44,21 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-headline font-semibold tracking-tight mb-4">
           Aktive Projekte
         </h2>
-        <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3">
           {activeProjects.map((project) => (
             <Card key={project.id}>
-              <CardHeader>
-                <CardTitle>{project.name}</CardTitle>
-                <CardDescription className="truncate">{project.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Progress value={project.progress} />
-                  <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
-                </div>
-              </CardContent>
-              <CardFooter className="gap-2">
-                <Button asChild className="w-full">
-                  <Link href={`/projects/${project.id}`}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Öffnen
-                  </Link>
-                </Button>
-                <Button asChild variant="secondary" className="w-full">
-                  <Link href={`/projects/${project.id}/edit`}>
-                    <Pen className="mr-2 h-4 w-4" />
-                    Bearbeiten
-                  </Link>
-                </Button>
-              </CardFooter>
+              <Link href={`/projects/${project.id}`}>
+                <CardHeader>
+                  <CardTitle>{project.name}</CardTitle>
+                  <CardDescription className="truncate">{project.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Progress value={project.progress} />
+                    <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
+                  </div>
+                </CardContent>
+              </Link>
             </Card>
           ))}
         </div>
@@ -93,14 +81,6 @@ export default function DashboardPage() {
                       className="object-cover"
                       data-ai-hint={pattern.imageHint}
                     />
-                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
-                      <Button variant="secondary" size="icon">
-                          <Eye />
-                      </Button>
-                      <Button variant="secondary" size="icon">
-                          <Pen />
-                      </Button>
-                    </div>
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold truncate">{pattern.title}</h3>
