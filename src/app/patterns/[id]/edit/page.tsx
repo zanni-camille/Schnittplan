@@ -104,7 +104,7 @@ export default function PatternEditPage() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="flex justify-between items-center">
             <Button asChild variant="ghost">
                 <Link href={`/patterns/${id}`}>
