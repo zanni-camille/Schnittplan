@@ -40,6 +40,7 @@ import {
 } from '@/lib/placeholder-data';
 import { Pen, PlusCircle, Trash2, Save, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type EditableItem = {
   id: string;
@@ -141,29 +142,51 @@ export default function AdminPage() {
     );
   };
 
-  const renderDeleteDialog = (itemName: string, onConfirm: () => void) => (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-            <Trash2 className="h-4 w-4" />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Bist du sicher?</AlertDialogTitle>
-          <AlertDialogDescription>
-             Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird "{itemName}" dauerhaft gelöscht.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
-            Löschen
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
+  const renderDeleteDialog = (itemName: string, onConfirm: () => void, isDisabled: boolean) => {
+    const deleteButton = (
+      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled={isDisabled}>
+          <Trash2 className="h-4 w-4" />
+      </Button>
+    );
+
+    if (isDisabled) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {/* The div is necessary for the tooltip to work on a disabled button */}
+              <div>{deleteButton}</div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Kann nicht gelöscht werden, da es noch verwendet wird.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )
+    }
+
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          {deleteButton}
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bist du sicher?</AlertDialogTitle>
+            <AlertDialogDescription>
+               Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird "{itemName}" dauerhaft gelöscht.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm}>
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  };
 
 
   return (
@@ -209,7 +232,7 @@ export default function AdminPage() {
                           <Button variant="ghost" size="icon">
                             <Pen className="h-4 w-4" />
                           </Button>
-                          {!isUsed && renderDeleteDialog(group.name, () => handleDeleteTargetGroup(group.id, group.name))}
+                          {renderDeleteDialog(group.name, () => handleDeleteTargetGroup(group.id, group.name), isUsed)}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -258,7 +281,7 @@ export default function AdminPage() {
                           <Button variant="ghost" size="icon">
                             <Pen className="h-4 w-4" />
                           </Button>
-                          {!isUsed && renderDeleteDialog(category.name, () => handleDeleteCategory(category.id, category.name))}
+                          {renderDeleteDialog(category.name, () => handleDeleteCategory(category.id, category.name), isUsed)}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -307,7 +330,7 @@ export default function AdminPage() {
                         <Button variant="ghost" size="icon">
                           <Pen className="h-4 w-4" />
                         </Button>
-                        {!isUsed && renderDeleteDialog(fabric.name, () => handleDeleteFabric(fabric.id, fabric.name))}
+                        {renderDeleteDialog(fabric.name, () => handleDeleteFabric(fabric.id, fabric.name), isUsed)}
                       </div>
                     </TableCell>
                   </TableRow>
