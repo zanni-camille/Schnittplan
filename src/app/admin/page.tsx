@@ -57,12 +57,13 @@ export default function AdminPage() {
       });
       return;
     }
+    const formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
     const newId = `${listName.toLowerCase()}-${Date.now()}`;
-    setter((prev) => [...prev, { id: newId, name: value }]);
+    setter((prev) => [...prev, { id: newId, name: formattedValue }]);
     newSetter(null);
     toast({
       title: 'Gespeichert!',
-      description: `Die neue ${listName} "${value}" wurde hinzugefügt.`,
+      description: `Die neue ${listName} "${formattedValue}" wurde hinzugefügt.`,
     });
   };
 
