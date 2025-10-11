@@ -86,15 +86,6 @@ export default function AdminPage() {
   };
   
   const handleDeleteTargetGroup = (groupId: string, groupName: string) => {
-    const isUsed = PATTERNS.some(p => p.targetGroupId === groupId);
-    if (isUsed) {
-      toast({
-        variant: 'destructive',
-        title: 'Löschen nicht möglich',
-        description: `Die Zielgruppe "${groupName}" wird in mindestens einem Schnittmuster verwendet.`,
-      });
-      return;
-    }
     setTargetGroups(prev => prev.filter(g => g.id !== groupId));
     toast({
       title: 'Gelöscht!',
@@ -103,15 +94,6 @@ export default function AdminPage() {
   };
   
   const handleDeleteCategory = (categoryId: string, categoryName: string) => {
-    const isUsed = PATTERNS.some(p => p.categoryIds.includes(categoryId));
-    if (isUsed) {
-      toast({
-        variant: 'destructive',
-        title: 'Löschen nicht möglich',
-        description: `Die Kategorie "${categoryName}" wird in mindestens einem Schnittmuster verwendet.`,
-      });
-      return;
-    }
     setCategories(prev => prev.filter(c => c.id !== categoryId));
     toast({
       title: 'Gelöscht!',
@@ -120,15 +102,6 @@ export default function AdminPage() {
   };
 
   const handleDeleteFabric = (fabricId: string, fabricName: string) => {
-    const isUsed = PATTERNS.some(p => p.fabricIds.includes(fabricId));
-     if (isUsed) {
-      toast({
-        variant: 'destructive',
-        title: 'Löschen nicht möglich',
-        description: `Die Stoffempfehlung "${fabricName}" wird in mindestens einem Schnittmuster verwendet.`,
-      });
-      return;
-    }
     setFabrics(prev => prev.filter(f => f.id !== fabricId));
     toast({
       title: 'Gelöscht!',
@@ -226,19 +199,22 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {targetGroups.map((group) => (
-                  <TableRow key={group.id}>
-                    <TableCell className="font-medium">{group.name}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Pen className="h-4 w-4" />
-                        </Button>
-                        {renderDeleteDialog(group.name, () => handleDeleteTargetGroup(group.id, group.name))}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {targetGroups.map((group) => {
+                  const isUsed = PATTERNS.some(p => p.targetGroupId === group.id);
+                  return (
+                    <TableRow key={group.id}>
+                      <TableCell className="font-medium">{group.name}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon">
+                            <Pen className="h-4 w-4" />
+                          </Button>
+                          {!isUsed && renderDeleteDialog(group.name, () => handleDeleteTargetGroup(group.id, group.name))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                  {renderNewRow(
                   newTargetGroup,
                   (e) => setNewTargetGroup(e.target.value),
@@ -272,19 +248,22 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">{category.name}</TableCell>
-                    <TableCell className="text-right">
-                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Pen className="h-4 w-4" />
-                        </Button>
-                        {renderDeleteDialog(category.name, () => handleDeleteCategory(category.id, category.name))}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {categories.map((category) => {
+                   const isUsed = PATTERNS.some(p => p.categoryIds.includes(category.id));
+                   return (
+                    <TableRow key={category.id}>
+                      <TableCell className="font-medium">{category.name}</TableCell>
+                      <TableCell className="text-right">
+                         <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon">
+                            <Pen className="h-4 w-4" />
+                          </Button>
+                          {!isUsed && renderDeleteDialog(category.name, () => handleDeleteCategory(category.id, category.name))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                   );
+                })}
                 {renderNewRow(
                   newCategory,
                   (e) => setNewCategory(e.target.value),
@@ -318,7 +297,9 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {fabrics.map((fabric) => (
+                {fabrics.map((fabric) => {
+                  const isUsed = PATTERNS.some(p => p.fabricIds.includes(fabric.id));
+                  return (
                   <TableRow key={fabric.id}>
                     <TableCell className="font-medium">{fabric.name}</TableCell>
                     <TableCell className="text-right">
@@ -326,11 +307,12 @@ export default function AdminPage() {
                         <Button variant="ghost" size="icon">
                           <Pen className="h-4 w-4" />
                         </Button>
-                        {renderDeleteDialog(fabric.name, () => handleDeleteFabric(fabric.id, fabric.name))}
+                        {!isUsed && renderDeleteDialog(fabric.name, () => handleDeleteFabric(fabric.id, fabric.name))}
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
                  {renderNewRow(
                   newFabric,
                   (e) => setNewFabric(e.target.value),
