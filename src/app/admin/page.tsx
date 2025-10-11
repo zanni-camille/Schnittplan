@@ -52,11 +52,23 @@ export default function AdminPage() {
   const [targetGroups, setTargetGroups] = useState<TargetGroup[]>(TARGET_GROUPS);
   const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   const [fabrics, setFabrics] = useState<Fabric[]>(FABRICS);
+  
   const [newTargetGroup, setNewTargetGroup] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState<string | null>(null);
   const [newFabric, setNewFabric] = useState<string | null>(null);
 
-  const handleSave = (
+  const [editingItem, setEditingItem] = useState<{ id: string, name: string } | null>(null);
+
+  const isEditing = newTargetGroup !== null || newCategory !== null || newFabric !== null || editingItem !== null;
+
+  const handleAddNew = (
+    setter: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    if (isEditing) return;
+    setter('');
+  };
+
+  const handleSaveNew = (
     listName: 'Zielgruppe' | 'Kategorie' | 'Stoffempfehlung',
     value: string | null,
     setter: React.Dispatch<React.SetStateAction<any[]>>,
@@ -70,7 +82,7 @@ export default function AdminPage() {
       });
       return;
     }
-    const formattedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
     const newId = `${listName.toLowerCase()}-${Date.now()}`;
     setter((prev) => [...prev, { id: newId, name: formattedValue }]);
     newSetter(null);
@@ -80,10 +92,38 @@ export default function AdminPage() {
     });
   };
 
-  const handleCancel = (
-    newSetter: React.Dispatch<React.SetStateAction<string | null>>
+  const handleEdit = (item: EditableItem) => {
+    if (isEditing) return;
+    setEditingItem({ ...item });
+  };
+
+  const handleUpdate = (
+    listName: 'Zielgruppe' | 'Kategorie' | 'Stoffempfehlung',
+    setter: React.Dispatch<React.SetStateAction<EditableItem[]>>
   ) => {
-    newSetter(null);
+    if (!editingItem) return;
+     if (!editingItem.name?.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Der Name darf nicht leer sein.',
+      });
+      return;
+    }
+    const formattedValue = editingItem.name.charAt(0).toUpperCase() + editingItem.name.slice(1);
+    setter(prev => prev.map(item => item.id === editingItem.id ? { ...item, name: formattedValue } : item));
+    toast({
+      title: 'Aktualisiert!',
+      description: `Die ${listName} wurde in "${formattedValue}" umbenannt.`,
+    });
+    setEditingItem(null);
+  };
+
+  const handleCancel = () => {
+    setNewTargetGroup(null);
+    setNewCategory(null);
+    setNewFabric(null);
+    setEditingItem(null);
   };
   
   const handleDeleteTargetGroup = (groupId: string, groupName: string) => {
@@ -114,7 +154,6 @@ export default function AdminPage() {
     value: string | null,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
     onSave: () => void,
-    onCancel: () => void,
     placeholder: string
   ) => {
     if (value === null) return null;
@@ -133,7 +172,7 @@ export default function AdminPage() {
             <Button variant="ghost" size="icon" onClick={onSave}>
               <Save className="h-4 w-4 text-primary" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={onCancel}>
+            <Button variant="ghost" size="icon" onClick={handleCancel}>
               <XCircle className="h-4 w-4 text-muted-foreground" />
             </Button>
           </div>
@@ -144,7 +183,7 @@ export default function AdminPage() {
 
   const renderDeleteDialog = (itemName: string, onConfirm: () => void, isDisabled: boolean) => {
     const deleteButton = (
-      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled={isDisabled}>
+      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled={isDisabled || isEditing}>
           <Trash2 className="h-4 w-4" />
       </Button>
     );
@@ -208,7 +247,7 @@ export default function AdminPage() {
               <CardTitle>Zielgruppen</CardTitle>
               <CardDescription>Für wen ist das Muster?</CardDescription>
             </div>
-            <Button size="sm" onClick={() => setNewTargetGroup('')} disabled={newTargetGroup !== null}>
+            <Button size="sm" onClick={() => handleAddNew(setNewTargetGroup)} disabled={isEditing}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Neu
             </Button>
@@ -224,12 +263,38 @@ export default function AdminPage() {
               <TableBody>
                 {targetGroups.map((group) => {
                   const isUsed = PATTERNS.some(p => p.targetGroupId === group.id);
+                  const isCurrentlyEditing = editingItem?.id === group.id;
+
+                  if (isCurrentlyEditing) {
+                    return (
+                      <TableRow key={group.id}>
+                        <TableCell>
+                          <Input
+                            value={editingItem.name}
+                            onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                            autoFocus
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => handleUpdate('Zielgruppe', setTargetGroups)}>
+                              <Save className="h-4 w-4 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={handleCancel}>
+                              <XCircle className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
                   return (
                     <TableRow key={group.id}>
                       <TableCell className="font-medium">{group.name}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(group)} disabled={isEditing}>
                             <Pen className="h-4 w-4" />
                           </Button>
                           {renderDeleteDialog(group.name, () => handleDeleteTargetGroup(group.id, group.name), isUsed)}
@@ -241,8 +306,7 @@ export default function AdminPage() {
                  {renderNewRow(
                   newTargetGroup,
                   (e) => setNewTargetGroup(e.target.value),
-                  () => handleSave('Zielgruppe', newTargetGroup, setTargetGroups, setNewTargetGroup),
-                  () => handleCancel(setNewTargetGroup),
+                  () => handleSaveNew('Zielgruppe', newTargetGroup, setTargetGroups, setNewTargetGroup),
                   "Neue Zielgruppe"
                 )}
               </TableBody>
@@ -257,7 +321,7 @@ export default function AdminPage() {
               <CardTitle>Kategorien</CardTitle>
               <CardDescription>Art des Kleidungsstücks.</CardDescription>
             </div>
-            <Button size="sm" onClick={() => setNewCategory('')} disabled={newCategory !== null}>
+            <Button size="sm" onClick={() => handleAddNew(setNewCategory)} disabled={isEditing}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Neu
             </Button>
@@ -273,12 +337,38 @@ export default function AdminPage() {
               <TableBody>
                 {categories.map((category) => {
                    const isUsed = PATTERNS.some(p => p.categoryIds.includes(category.id));
+                   const isCurrentlyEditing = editingItem?.id === category.id;
+
+                   if (isCurrentlyEditing) {
+                    return (
+                      <TableRow key={category.id}>
+                        <TableCell>
+                          <Input
+                            value={editingItem.name}
+                            onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                            autoFocus
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => handleUpdate('Kategorie', setCategories)}>
+                              <Save className="h-4 w-4 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={handleCancel}>
+                              <XCircle className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                   }
+
                    return (
                     <TableRow key={category.id}>
                       <TableCell className="font-medium">{category.name}</TableCell>
                       <TableCell className="text-right">
                          <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(category)} disabled={isEditing}>
                             <Pen className="h-4 w-4" />
                           </Button>
                           {renderDeleteDialog(category.name, () => handleDeleteCategory(category.id, category.name), isUsed)}
@@ -290,8 +380,7 @@ export default function AdminPage() {
                 {renderNewRow(
                   newCategory,
                   (e) => setNewCategory(e.target.value),
-                  () => handleSave('Kategorie', newCategory, setCategories, setNewCategory),
-                  () => handleCancel(setNewCategory),
+                  () => handleSaveNew('Kategorie', newCategory, setCategories, setNewCategory),
                   "Neue Kategorie"
                 )}
               </TableBody>
@@ -306,7 +395,7 @@ export default function AdminPage() {
               <CardTitle>Stoffempfehlungen</CardTitle>
               <CardDescription>Geeignete Stoffarten.</CardDescription>
             </div>
-            <Button size="sm" onClick={() => setNewFabric('')} disabled={newFabric !== null}>
+            <Button size="sm" onClick={() => handleAddNew(setNewFabric)} disabled={isEditing}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Neu
             </Button>
@@ -322,12 +411,38 @@ export default function AdminPage() {
               <TableBody>
                 {fabrics.map((fabric) => {
                   const isUsed = PATTERNS.some(p => p.fabricIds.includes(fabric.id));
+                  const isCurrentlyEditing = editingItem?.id === fabric.id;
+
+                  if (isCurrentlyEditing) {
+                    return (
+                      <TableRow key={fabric.id}>
+                        <TableCell>
+                          <Input
+                            value={editingItem.name}
+                            onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                            autoFocus
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => handleUpdate('Stoffempfehlung', setFabrics)}>
+                              <Save className="h-4 w-4 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={handleCancel}>
+                              <XCircle className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+                  
                   return (
                   <TableRow key={fabric.id}>
                     <TableCell className="font-medium">{fabric.name}</TableCell>
                     <TableCell className="text-right">
                        <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(fabric)} disabled={isEditing}>
                           <Pen className="h-4 w-4" />
                         </Button>
                         {renderDeleteDialog(fabric.name, () => handleDeleteFabric(fabric.id, fabric.name), isUsed)}
@@ -339,8 +454,7 @@ export default function AdminPage() {
                  {renderNewRow(
                   newFabric,
                   (e) => setNewFabric(e.target.value),
-                  () => handleSave('Stoffempfehlung', newFabric, setFabrics, setNewFabric),
-                  () => handleCancel(setNewFabric),
+                  () => handleSaveNew('Stoffempfehlung', newFabric, setFabrics, setNewFabric),
                   "Neue Stoffart"
                 )}
               </TableBody>
