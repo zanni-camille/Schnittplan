@@ -19,9 +19,21 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
   CATEGORIES,
   FABRICS,
   TARGET_GROUPS,
+  PATTERNS,
   Category,
   Fabric,
   TargetGroup,
@@ -73,6 +85,57 @@ export default function AdminPage() {
     newSetter(null);
   };
   
+  const handleDeleteTargetGroup = (groupId: string, groupName: string) => {
+    const isUsed = PATTERNS.some(p => p.targetGroupId === groupId);
+    if (isUsed) {
+      toast({
+        variant: 'destructive',
+        title: 'Löschen nicht möglich',
+        description: `Die Zielgruppe "${groupName}" wird in mindestens einem Schnittmuster verwendet.`,
+      });
+      return;
+    }
+    setTargetGroups(prev => prev.filter(g => g.id !== groupId));
+    toast({
+      title: 'Gelöscht!',
+      description: `Die Zielgruppe "${groupName}" wurde entfernt.`,
+    });
+  };
+  
+  const handleDeleteCategory = (categoryId: string, categoryName: string) => {
+    const isUsed = PATTERNS.some(p => p.categoryIds.includes(categoryId));
+    if (isUsed) {
+      toast({
+        variant: 'destructive',
+        title: 'Löschen nicht möglich',
+        description: `Die Kategorie "${categoryName}" wird in mindestens einem Schnittmuster verwendet.`,
+      });
+      return;
+    }
+    setCategories(prev => prev.filter(c => c.id !== categoryId));
+    toast({
+      title: 'Gelöscht!',
+      description: `Die Kategorie "${categoryName}" wurde entfernt.`,
+    });
+  };
+
+  const handleDeleteFabric = (fabricId: string, fabricName: string) => {
+    const isUsed = PATTERNS.some(p => p.fabricIds.includes(fabricId));
+     if (isUsed) {
+      toast({
+        variant: 'destructive',
+        title: 'Löschen nicht möglich',
+        description: `Die Stoffempfehlung "${fabricName}" wird in mindestens einem Schnittmuster verwendet.`,
+      });
+      return;
+    }
+    setFabrics(prev => prev.filter(f => f.id !== fabricId));
+    toast({
+      title: 'Gelöscht!',
+      description: `Die Stoffempfehlung "${fabricName}" wurde entfernt.`,
+    });
+  };
+
   const renderNewRow = (
     value: string | null,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -104,6 +167,30 @@ export default function AdminPage() {
       </TableRow>
     );
   };
+
+  const renderDeleteDialog = (itemName: string, onConfirm: () => void) => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+            <Trash2 className="h-4 w-4" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Bist du sicher?</AlertDialogTitle>
+          <AlertDialogDescription>
+             Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird "{itemName}" dauerhaft gelöscht.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>
+            Löschen
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
 
   return (
@@ -147,9 +234,7 @@ export default function AdminPage() {
                         <Button variant="ghost" size="icon">
                           <Pen className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {renderDeleteDialog(group.name, () => handleDeleteTargetGroup(group.id, group.name))}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -195,9 +280,7 @@ export default function AdminPage() {
                         <Button variant="ghost" size="icon">
                           <Pen className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {renderDeleteDialog(category.name, () => handleDeleteCategory(category.id, category.name))}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -243,9 +326,7 @@ export default function AdminPage() {
                         <Button variant="ghost" size="icon">
                           <Pen className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {renderDeleteDialog(fabric.name, () => handleDeleteFabric(fabric.id, fabric.name))}
                       </div>
                     </TableCell>
                   </TableRow>
