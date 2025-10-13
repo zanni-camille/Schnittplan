@@ -22,9 +22,9 @@ import { PlusCircle, Search } from 'lucide-react';
 
 export default function PatternsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedFabric, setSelectedFabric] = useState('');
-  const [selectedCreator, setSelectedCreator] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
+  const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
 
   const filteredPatterns = useMemo(() => {
     return PATTERNS.filter((pattern) => {
@@ -42,6 +42,18 @@ export default function PatternsPage() {
       return matchesSearch && matchesCategory && matchesFabric && matchesCreator;
     });
   }, [searchQuery, selectedCategory, selectedFabric, selectedCreator]);
+  
+  const handleSetCategory = (value: string) => {
+    setSelectedCategory(value === 'all' ? null : value);
+  };
+  
+  const handleSetFabric = (value: string) => {
+    setSelectedFabric(value === 'all' ? null : value);
+  };
+  
+  const handleSetCreator = (value: string) => {
+    setSelectedCreator(value === 'all' ? null : value);
+  };
 
   return (
     <div className="space-y-8">
@@ -72,34 +84,34 @@ export default function PatternsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)} 
               />
             </div>
-            <Select onValueChange={setSelectedCategory} value={selectedCategory}>
+            <Select onValueChange={handleSetCategory} value={selectedCategory || 'all'}>
               <SelectTrigger>
                 <SelectValue placeholder="Nach Kategorie filtern" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle Kategorien</SelectItem>
+                <SelectItem value="all">Alle Kategorien</SelectItem>
                 {CATEGORIES.map(category => (
                   <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select onValueChange={setSelectedFabric} value={selectedFabric}>
+            <Select onValueChange={handleSetFabric} value={selectedFabric || 'all'}>
               <SelectTrigger>
                 <SelectValue placeholder="Nach Stoff filtern" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle Stoffe</SelectItem>
+                <SelectItem value="all">Alle Stoffe</SelectItem>
                 {FABRICS.map(fabric => (
                   <SelectItem key={fabric.id} value={fabric.id}>{fabric.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-             <Select onValueChange={setSelectedCreator} value={selectedCreator}>
+             <Select onValueChange={handleSetCreator} value={selectedCreator || 'all'}>
               <SelectTrigger>
                 <SelectValue placeholder="Nach Designer filtern" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle Designer</SelectItem>
+                <SelectItem value="all">Alle Designer</SelectItem>
                 {CREATORS.map(creator => (
                   <SelectItem key={creator.id} value={creator.id}>{creator.name}</SelectItem>
                 ))}
