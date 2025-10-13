@@ -12,7 +12,7 @@ import {
   SidebarContent
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
-import { LayoutDashboard, FolderKanban, Scissors, Users, Settings } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Scissors, Users, Settings, Cog } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
@@ -21,6 +21,8 @@ const menuItems = [
   { href: "/patterns", label: "Schnittmuster", icon: Scissors },
   { href: "/creators", label: "Designer", icon: Users },
 ];
+
+const adminMenuItem = { href: "/admin", label: "Verwaltung", icon: Cog };
 
 export function SiteSidebar() {
   const pathname = usePathname();
@@ -50,6 +52,22 @@ export function SiteSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+           <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === adminMenuItem.href}
+                tooltip={{
+                  children: adminMenuItem.label,
+                  className: "font-headline"
+                }}
+                className={cn(pathname === adminMenuItem.href && "font-bold")}
+              >
+                <Link href={adminMenuItem.href}>
+                  <adminMenuItem.icon />
+                  <span>{adminMenuItem.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
