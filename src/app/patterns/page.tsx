@@ -1,5 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -18,6 +21,28 @@ import { PATTERNS, CATEGORIES, FABRICS, CREATORS } from '@/lib/placeholder-data'
 import { PlusCircle, Search } from 'lucide-react';
 
 export default function PatternsPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedFabric, setSelectedFabric] = useState('');
+  const [selectedCreator, setSelectedCreator] = useState('');
+
+  const filteredPatterns = useMemo(() => {
+    return PATTERNS.filter((pattern) => {
+      const creator = CREATORS.find(c => c.id === pattern.creatorId);
+      const matchesSearch =
+        pattern.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (creator && creator.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory =
+        !selectedCategory || pattern.categoryIds.includes(selectedCategory);
+      const matchesFabric =
+        !selectedFabric || pattern.fabricIds.includes(selectedFabric);
+      const matchesCreator =
+        !selectedCreator || pattern.creatorId === selectedCreator;
+
+      return matchesSearch && matchesCategory && matchesFabric && matchesCreator;
+    });
+  }, [searchQuery, selectedCategory, selectedFabric, selectedCreator]);
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -40,33 +65,41 @@ export default function PatternsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Schnittmuster suchen..." className="pl-8" />
+              <Input 
+                placeholder="Schnittmuster suchen..." 
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)} 
+              />
             </div>
-            <Select>
+            <Select onValueChange={setSelectedCategory} value={selectedCategory}>
               <SelectTrigger>
                 <SelectValue placeholder="Nach Kategorie filtern" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Alle Kategorien</SelectItem>
                 {CATEGORIES.map(category => (
                   <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select>
+            <Select onValueChange={setSelectedFabric} value={selectedFabric}>
               <SelectTrigger>
                 <SelectValue placeholder="Nach Stoff filtern" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Alle Stoffe</SelectItem>
                 {FABRICS.map(fabric => (
                   <SelectItem key={fabric.id} value={fabric.id}>{fabric.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-             <Select>
+             <Select onValueChange={setSelectedCreator} value={selectedCreator}>
               <SelectTrigger>
                 <SelectValue placeholder="Nach Designer filtern" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Alle Designer</SelectItem>
                 {CREATORS.map(creator => (
                   <SelectItem key={creator.id} value={creator.id}>{creator.name}</SelectItem>
                 ))}
@@ -77,7 +110,7 @@ export default function PatternsPage() {
       </Card>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {PATTERNS.map((pattern) => {
+        {filteredPatterns.map((pattern) => {
           const creator = CREATORS.find(c => c.id === pattern.creatorId);
           return (
             <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
@@ -88,7 +121,7 @@ export default function PatternsPage() {
                       src={pattern.imageUrl}
                       alt={pattern.title}
                       fill
-                      className="object-cover transition-transform group-hover:scale-105"
+                      className="object-cover transition-transform group-hover:scale-10"
                       data-ai-hint={pattern.imageHint}
                     />
                   </div>
