@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/select';
 import { PATTERNS, CATEGORIES, FABRICS, CREATORS } from '@/lib/placeholder-data';
 import { PlusCircle, Search, RotateCcw } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 
 export default function PatternsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,11 +83,11 @@ export default function PatternsPage() {
 
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="relative lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="relative sm:col-span-2 md:col-span-3 lg:col-span-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Schnittmuster suchen..." 
+                placeholder="Suchen..." 
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)} 
@@ -124,10 +126,19 @@ export default function PatternsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="ghost" onClick={handleResetFilters} className="w-full">
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Zurücksetzen
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={handleResetFilters} className="w-full">
+                    <RotateCcw className="h-4 w-4" />
+                    <span className="sr-only">Filter zurücksetzen</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Filter zurücksetzen</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardContent>
       </Card>
