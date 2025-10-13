@@ -1,0 +1,242 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Represents a user's profile information.",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        }
+      },
+      "required": [
+        "displayName",
+        "email"
+      ]
+    },
+    "Pattern": {
+      "title": "Sewing Pattern",
+      "description": "Represents a single sewing pattern in the user's library.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "imageHint": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "instructionUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "additionalPdfUrls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "targetGroupId": {
+          "type": "string"
+        },
+        "fabricIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "categoryIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "creatorId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "imageUrl",
+        "targetGroupId",
+        "fabricIds",
+        "categoryIds",
+        "creatorId"
+      ]
+    },
+    "Project": {
+      "title": "Sewing Project",
+      "description": "Represents a sewing project a user is working on.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "progress": {
+          "type": "number"
+        },
+        "patternIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "imageUrls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "imageHints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "completionDates": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "startDate",
+        "progress",
+        "patternIds"
+      ]
+    },
+    "Creator": {
+      "title": "Creator",
+      "description": "Represents a pattern creator/designer.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A category for a sewing pattern, e.g., 'Dresses'.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Fabric": {
+      "title": "Fabric",
+      "description": "A type of fabric, e.g., 'Cotton'.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "TargetGroup": {
+      "title": "Target Group",
+      "description": "The target group for a pattern, e.g., 'Women'.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Stores user profile information."
+    },
+    "/users/{userId}/patterns/{patternId}": {
+      "schema": {
+        "$ref": "#/entities/Pattern"
+      },
+      "description": "Stores the user's sewing patterns."
+    },
+    "/users/{userId}/projects/{projectId}": {
+      "schema": {
+        "$ref": "#/entities/Project"
+      },
+      "description": "Stores the user's sewing projects."
+    },
+    "/users/{userId}/creators/{creatorId}": {
+      "schema": {
+        "$ref": "#/entities/Creator"
+      },
+      "description": "Stores the user's custom creators/designers."
+    },
+    "/users/{userId}/categories/{categoryId}": {
+      "schema": {
+        "$ref": "#/entities/Category"
+      },
+      "description": "Stores the user's custom categories."
+    },
+    "/users/{userId}/fabrics/{fabricId}": {
+      "schema": {
+        "$ref": "#/entities/Fabric"
+      },
+      "description": "Stores the user's custom fabric types."
+    },
+    "/users/{userId}/targetGroups/{targetGroupId}": {
+      "schema": {
+        "$ref": "#/entities/TargetGroup"
+      },
+      "description": "Stores the user's custom target groups."
+    }
+  }
+}
