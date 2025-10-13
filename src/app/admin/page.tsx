@@ -242,15 +242,9 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Target Groups */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Zielgruppen</CardTitle>
-              <CardDescription>Für wen ist das Muster?</CardDescription>
-            </div>
-            <Button size="sm" onClick={() => handleAddNew(setNewTargetGroup)} disabled={isEditing}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Neu
-            </Button>
+          <CardHeader>
+            <CardTitle>Zielgruppen</CardTitle>
+            <CardDescription>Für wen ist das Muster?</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -311,20 +305,20 @@ export default function AdminPage() {
                 )}
               </TableBody>
             </Table>
+            <div className="mt-4">
+              <Button size="sm" onClick={() => handleAddNew(setNewTargetGroup)} disabled={isEditing} className="w-full">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Neu
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
         {/* Categories */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Kategorien</CardTitle>
-              <CardDescription>Art des Kleidungsstücks.</CardDescription>
-            </div>
-            <Button size="sm" onClick={() => handleAddNew(setNewCategory)} disabled={isEditing}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Neu
-            </Button>
+          <CardHeader>
+            <CardTitle>Kategorien</CardTitle>
+            <CardDescription>Art des Kleidungsstücks.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -385,20 +379,20 @@ export default function AdminPage() {
                 )}
               </TableBody>
             </Table>
+             <div className="mt-4">
+              <Button size="sm" onClick={() => handleAddNew(setNewCategory)} disabled={isEditing} className="w-full">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Neu
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
         {/* Fabrics */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Stoffempfehlungen</CardTitle>
-              <CardDescription>Geeignete Stoffarten.</CardDescription>
-            </div>
-            <Button size="sm" onClick={() => handleAddNew(setNewFabric)} disabled={isEditing}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Neu
-            </Button>
+          <CardHeader>
+            <CardTitle>Stoffempfehlungen</CardTitle>
+            <CardDescription>Geeignete Stoffarten.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -459,6 +453,12 @@ export default function AdminPage() {
                 )}
               </TableBody>
             </Table>
+            <div className="mt-4">
+              <Button size="sm" onClick={() => handleAddNew(setNewFabric)} disabled={isEditing} className="w-full">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Neu
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
