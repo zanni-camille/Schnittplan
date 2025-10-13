@@ -17,13 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCollection } from '@/firebase';
-import { useUser } from '@/firebase/auth/use-user';
-import { collection, query, where, CollectionReference, DocumentReference } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
 import type { Pattern, Category, Fabric, Creator } from '@/lib/definitions';
 import { PlusCircle, Search, RotateCcw } from 'lucide-react';
-import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useFirestore } from '@/firebase';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useMemoFirebase } from '@/firebase/hooks';
 
 

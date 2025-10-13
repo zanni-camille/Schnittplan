@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { SiteSidebar } from '@/components/layout/site-sidebar';
 import { SiteHeader } from '@/components/layout/site-header';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'SchnittPlan',
@@ -24,18 +25,20 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn('font-body antialiased min-h-screen bg-background')}>
-        <SidebarProvider>
-          <div className="relative flex">
-            <SiteSidebar />
-            <div className="flex-1 flex flex-col">
-              <SiteHeader />
-              <main className="flex-grow p-4 sm:p-6 lg:p-8">
-                {children}
-              </main>
+        <FirebaseClientProvider>
+          <SidebarProvider>
+            <div className="relative flex">
+              <SiteSidebar />
+              <div className="flex-1 flex flex-col">
+                <SiteHeader />
+                <main className="flex-grow p-4 sm:p-6 lg:p-8">
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-          <Toaster />
-        </SidebarProvider>
+            <Toaster />
+          </SidebarProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );

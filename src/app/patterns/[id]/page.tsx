@@ -27,8 +27,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 
-import { useDoc, useCollection, useFirestore } from '@/firebase';
-import { useUser } from '@/firebase/auth/use-user';
+import { useDoc, useCollection, useFirestore, useUser } from '@/firebase';
 import { doc, deleteDoc, collection, query, where } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
 import type { Pattern, Category, Fabric, TargetGroup, Creator, Project } from '@/lib/definitions';

@@ -34,8 +34,7 @@ import {
 import { ArrowLeft, Save, Upload, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { useUser } from '@/firebase/auth/use-user';
-import { useDoc, useCollection, useFirestore } from '@/firebase';
+import { useDoc, useCollection, useFirestore, useUser } from '@/firebase';
 import { doc, updateDoc, collection } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
 import type { Pattern, Category, Fabric, TargetGroup, Creator } from '@/lib/definitions';
