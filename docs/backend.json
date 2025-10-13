@@ -237,6 +237,24 @@
         "$ref": "#/entities/TargetGroup"
       },
       "description": "Stores the user's custom target groups."
+    },
+    "/categories/{categoryId}": {
+      "schema": {
+        "$ref": "#/entities/Category"
+      },
+      "description": "Stores globally available categories."
+    },
+    "/fabrics/{fabricId}": {
+      "schema": {
+        "$ref": "#/entities/Fabric"
+      },
+      "description": "Stores globally available fabric types."
+    },
+    "/targetGroups/{targetGroupId}": {
+      "schema": {
+        "$ref": "#/entities/TargetGroup"
+      },
+      "description": "Stores globally available target groups."
     }
   }
 }
