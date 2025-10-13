@@ -31,16 +31,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  PATTERNS,
-  CREATORS,
-  FABRICS,
-  CATEGORIES,
-  TARGET_GROUPS,
-} from '@/lib/placeholder-data';
 import { ArrowLeft, Save, Upload, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRef } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
+import { useUser } from '@/firebase/auth/use-user';
+import { useDoc, useCollection, useFirestore } from '@/firebase';
+import { doc, updateDoc, collection } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
+import type { Pattern, Category, Fabric, TargetGroup, Creator } from '@/lib/definitions';
+
 
 const patternFormSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -61,43 +60,118 @@ export default function PatternEditPage() {
   const router = useRouter();
   const { id } = params;
   const { toast } = useToast();
+  const { user } = useUser();
+  const firestore = useFirestore();
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const instructionPdfInputRef = useRef<HTMLInputElement>(null);
   const additionalPdfInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const pattern = PATTERNS.find((p) => p.id === id);
+  const userId = user?.uid || 'user-1';
+
+  const patternRef = useMemoFirebase(() => 
+    (firestore && userId && id) ? doc(firestore, 'users', userId, 'patterns', id as string) : null
+  , [firestore, userId, id]);
+  const { data: pattern, loading: patternLoading } = useDoc<Pattern>(patternRef);
+
+  const [imageUrl, setImageUrl] = useState<string | undefined>(pattern?.imageUrl);
+  const [imageHint, setImageHint] = useState<string | undefined>(pattern?.imageHint);
+
+  const globalCategoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
+  const userCategoriesQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'categories') : null, [firestore, userId]);
+  const { data: globalCategories } = useCollection<Category>(globalCategoriesQuery);
+  const { data: userCategories } = useCollection<Category>(userCategoriesQuery);
+  const allCategories = useMemo(() => [...(globalCategories || []), ...(userCategories || [])], [globalCategories, userCategories]);
+
+  const globalFabricsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'fabrics') : null, [firestore]);
+  const userFabricsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'fabrics') : null, [firestore, userId]);
+  const { data: globalFabrics } = useCollection<Fabric>(globalFabricsQuery);
+  const { data: userFabrics } = useCollection<Fabric>(userFabricsQuery);
+  const allFabrics = useMemo(() => [...(globalFabrics || []), ...(userFabrics || [])], [globalFabrics, userFabrics]);
+
+  const globalTargetGroupsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'targetGroups') : null, [firestore]);
+  const userTargetGroupsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'targetGroups') : null, [firestore, userId]);
+  const { data: globalTargetGroups } = useCollection<TargetGroup>(globalTargetGroupsQuery);
+  const { data: userTargetGroups } = useCollection<TargetGroup>(userTargetGroupsQuery);
+  const allTargetGroups = useMemo(() => [...(globalTargetGroups || []), ...(userTargetGroups || [])], [globalTargetGroups, userTargetGroups]);
+
+  const userCreatorsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'creators') : null, [firestore, userId]);
+  const { data: creators } = useCollection<Creator>(userCreatorsQuery);
 
   const form = useForm<PatternFormValues>({
     resolver: zodResolver(patternFormSchema),
-    defaultValues: {
+    values: pattern ? {
       ...pattern,
-      additionalPdfUrls: pattern?.additionalPdfUrls?.map(url => ({ value: url })) || [],
-    },
+      additionalPdfUrls: pattern.additionalPdfUrls?.map(url => ({ value: url })) || [],
+    } : undefined,
   });
+  
+  useEffect(() => {
+    if (pattern) {
+      setImageUrl(pattern.imageUrl);
+      setImageHint(pattern.imageHint);
+      form.reset({
+        ...pattern,
+        additionalPdfUrls: pattern.additionalPdfUrls?.map(url => ({ value: url })) || [],
+      });
+    }
+  }, [pattern, form]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'additionalPdfUrls'
   });
 
+  if (patternLoading) {
+    return <div>Wird geladen...</div>;
+  }
+  
   if (!pattern) {
     notFound();
   }
 
-  function onSubmit(data: PatternFormValues) {
-    toast({
-      title: 'Gespeichert!',
-      description: `Schnittmuster "${data.title}" wurde erfolgreich aktualisiert.`,
-    });
-    console.log(data);
-    router.push(`/patterns/${id}`);
+  async function onSubmit(data: PatternFormValues) {
+    if (!patternRef) return;
+
+    try {
+      await updateDoc(patternRef, {
+        ...data,
+        imageUrl,
+        imageHint,
+        additionalPdfUrls: data.additionalPdfUrls?.map(url => url.value).filter(Boolean),
+      });
+
+      toast({
+        title: 'Gespeichert!',
+        description: `Schnittmuster "${data.title}" wurde erfolgreich aktualisiert.`,
+      });
+      router.push(`/patterns/${id}`);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Schnittmuster konnte nicht aktualisiert werden.',
+      });
+      console.error("Error updating document: ", error);
+    }
   }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const file = event.target.files?.[0];
     if (file) {
       field.onChange(file.name);
+    }
+  };
+
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImageUrl(e.target?.result as string);
+        setImageHint(file.name.split('.')[0] || 'uploaded image');
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -121,13 +195,15 @@ export default function PatternEditPage() {
           <div className="md:col-span-1 space-y-4">
             <Card className="overflow-hidden">
                 <div className="aspect-[3/4] relative group">
-                    <Image
-                        src={pattern.imageUrl}
-                        alt={pattern.title}
-                        fill
-                        className="object-cover"
-                        data-ai-hint={pattern.imageHint}
-                    />
+                    {imageUrl && (
+                      <Image
+                          src={imageUrl}
+                          alt={pattern.title}
+                          fill
+                          className="object-cover"
+                          data-ai-hint={imageHint}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button type="button" onClick={() => imageInputRef.current?.click()}>
                             <Upload className="mr-2 h-4 w-4" />
@@ -138,13 +214,7 @@ export default function PatternEditPage() {
                           ref={imageInputRef}
                           className="hidden"
                           accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              // Here you would handle the image upload/preview
-                              console.log("Selected image:", file.name);
-                            }
-                          }}
+                          onChange={handleImageSelect}
                         />
                     </div>
                 </div>
@@ -204,7 +274,7 @@ export default function PatternEditPage() {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {CREATORS.map(creator => (
+                                        {creators?.map(creator => (
                                             <SelectItem key={creator.id} value={creator.id}>{creator.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -227,7 +297,7 @@ export default function PatternEditPage() {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {TARGET_GROUPS.map(group => (
+                                        {allTargetGroups.map(group => (
                                             <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -244,7 +314,7 @@ export default function PatternEditPage() {
                         <FormItem>
                           <FormLabel>Kategorien</FormLabel>
                           <div className="space-y-2">
-                            {CATEGORIES.map((item) => (
+                            {allCategories.map((item) => (
                               <FormField
                                 key={item.id}
                                 control={form.control}
@@ -290,7 +360,7 @@ export default function PatternEditPage() {
                         <FormItem>
                           <FormLabel>Stoffempfehlungen</FormLabel>
                            <div className="space-y-2">
-                            {FABRICS.map((item) => (
+                            {allFabrics.map((item) => (
                               <FormField
                                 key={item.id}
                                 control={form.control}

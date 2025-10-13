@@ -17,20 +17,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PATTERNS, CATEGORIES, FABRICS, CREATORS } from '@/lib/placeholder-data';
+import { useCollection } from '@/firebase';
+import { useUser } from '@/firebase/auth/use-user';
+import { collection, query, where, CollectionReference, DocumentReference } from 'firebase/firestore';
+import type { Pattern, Category, Fabric, Creator } from '@/lib/definitions';
 import { PlusCircle, Search, RotateCcw } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useFirestore } from '@/firebase';
+import { useMemoFirebase } from '@/firebase/hooks';
 
 
 export default function PatternsPage() {
+  const { user, loading: userLoading } = useUser();
+  const firestore = useFirestore();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
 
+  const userId = user?.uid || 'user-1'; // Temporary fallback for development
+
+  const patternsQuery = useMemoFirebase(() => 
+    firestore && userId ? query(collection(firestore, 'users', userId, 'patterns')) : null
+  , [firestore, userId]);
+  const { data: patterns, loading: patternsLoading } = useCollection<Pattern>(patternsQuery);
+
+  const globalCategoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
+  const userCategoriesQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'categories') : null, [firestore, userId]);
+  
+  const globalFabricsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'fabrics') : null, [firestore]);
+  const userFabricsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'fabrics') : null, [firestore, userId]);
+  
+  const userCreatorsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'creators') : null, [firestore, userId]);
+
+  const { data: globalCategories } = useCollection<Category>(globalCategoriesQuery);
+  const { data: userCategories } = useCollection<Category>(userCategoriesQuery);
+  const allCategories = useMemo(() => [...(globalCategories || []), ...(userCategories || [])], [globalCategories, userCategories]);
+  
+  const { data: globalFabrics } = useCollection<Fabric>(globalFabricsQuery);
+  const { data: userFabrics } = useCollection<Fabric>(userFabricsQuery);
+  const allFabrics = useMemo(() => [...(globalFabrics || []), ...(userFabrics || [])], [globalFabrics, userFabrics]);
+
+  const { data: creators } = useCollection<Creator>(userCreatorsQuery);
+
+
   const filteredPatterns = useMemo(() => {
-    return PATTERNS.filter((pattern) => {
-      const creator = CREATORS.find(c => c.id === pattern.creatorId);
+    if (!patterns || !creators) return [];
+    return patterns.filter((pattern) => {
+      const creator = creators.find(c => c.id === pattern.creatorId);
       const matchesSearch =
         pattern.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (creator && creator.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -43,7 +78,7 @@ export default function PatternsPage() {
 
       return matchesSearch && matchesCategory && matchesFabric && matchesCreator;
     });
-  }, [searchQuery, selectedCategory, selectedFabric, selectedCreator]);
+  }, [searchQuery, selectedCategory, selectedFabric, selectedCreator, patterns, creators]);
   
   const handleSetCategory = (value: string) => {
     setSelectedCategory(value === 'all' ? null : value);
@@ -99,7 +134,7 @@ export default function PatternsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle Kategorien</SelectItem>
-                {CATEGORIES.map(category => (
+                {allCategories.map(category => (
                   <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -110,7 +145,7 @@ export default function PatternsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle Stoffe</SelectItem>
-                {FABRICS.map(fabric => (
+                {allFabrics.map(fabric => (
                   <SelectItem key={fabric.id} value={fabric.id}>{fabric.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -121,7 +156,7 @@ export default function PatternsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle Designer</SelectItem>
-                {CREATORS.map(creator => (
+                {creators?.map(creator => (
                   <SelectItem key={creator.id} value={creator.id}>{creator.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -145,7 +180,7 @@ export default function PatternsPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {filteredPatterns.map((pattern) => {
-          const creator = CREATORS.find(c => c.id === pattern.creatorId);
+          const creator = creators?.find(c => c.id === pattern.creatorId);
           return (
             <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
               <Link href={`/patterns/${pattern.id}`} className="block">

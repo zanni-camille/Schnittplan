@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound, useRouter } from 'next/navigation';
+import { notFound, useRouter, useParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -12,14 +12,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  PATTERNS,
-  CREATORS,
-  FABRICS,
-  CATEGORIES,
-  TARGET_GROUPS,
-  PROJECTS,
-} from '@/lib/placeholder-data';
 import { ExternalLink, Paperclip, Info, Tag, Users, Layers, BookOpen, FolderKanban, ArrowLeft, Pen, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -35,34 +27,91 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 
-export default function PatternDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+import { useDoc, useCollection, useFirestore } from '@/firebase';
+import { useUser } from '@/firebase/auth/use-user';
+import { doc, deleteDoc, collection, query, where } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
+import type { Pattern, Category, Fabric, TargetGroup, Creator, Project } from '@/lib/definitions';
+import { useMemo } from 'react';
+
+export default function PatternDetailPage() {
+  const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const pattern = PATTERNS.find((p) => p.id === params.id);
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const id = params.id as string;
+
+  const userId = user?.uid || 'user-1';
+
+  const patternRef = useMemoFirebase(() => 
+    (firestore && userId && id) ? doc(firestore, 'users', userId, 'patterns', id) : null
+  , [firestore, userId, id]);
+  const { data: pattern, loading: patternLoading } = useDoc<Pattern>(patternRef);
+
+  const handleDelete = async () => {
+    if (!patternRef) return;
+    try {
+      await deleteDoc(patternRef);
+      toast({
+        title: 'Schnittmuster gelöscht',
+        description: `"${pattern?.title}" wurde erfolgreich entfernt.`,
+      });
+      router.push('/patterns');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler beim Löschen',
+        description: 'Das Schnittmuster konnte nicht gelöscht werden.',
+      });
+    }
+  };
+
+  const creatorRef = useMemoFirebase(() => 
+    (firestore && userId && pattern?.creatorId) ? doc(firestore, 'users', userId, 'creators', pattern.creatorId) : null
+  , [firestore, userId, pattern?.creatorId]);
+  const { data: creator } = useDoc<Creator>(creatorRef);
+
+  const globalTargetGroupRef = useMemoFirebase(() => 
+    (firestore && pattern?.targetGroupId) ? doc(firestore, 'targetGroups', pattern.targetGroupId) : null
+  , [firestore, pattern?.targetGroupId]);
+  const userTargetGroupRef = useMemoFirebase(() =>
+    (firestore && userId && pattern?.targetGroupId) ? doc(firestore, 'users', userId, 'targetGroups', pattern.targetGroupId) : null
+  , [firestore, userId, pattern?.targetGroupId]);
+
+  const { data: globalTg } = useDoc<TargetGroup>(globalTargetGroupRef);
+  const { data: userTg } = useDoc<TargetGroup>(userTargetGroupRef);
+  const targetGroup = useMemo(() => globalTg || userTg, [globalTg, userTg]);
+
+
+  const globalCategoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
+  const userCategoriesQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'categories') : null, [firestore, userId]);
+  const { data: globalCategories } = useCollection<Category>(globalCategoriesQuery);
+  const { data: userCategories } = useCollection<Category>(userCategoriesQuery);
+  const allCategories = useMemo(() => [...(globalCategories || []), ...(userCategories || [])], [globalCategories, userCategories]);
+  const categories = useMemo(() => allCategories.filter((c) => pattern?.categoryIds.includes(c.id)), [allCategories, pattern]);
+  
+  const globalFabricsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'fabrics') : null, [firestore]);
+  const userFabricsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'fabrics') : null, [firestore, userId]);
+  const { data: globalFabrics } = useCollection<Fabric>(globalFabricsQuery);
+  const { data: userFabrics } = useCollection<Fabric>(userFabricsQuery);
+  const allFabrics = useMemo(() => [...(globalFabrics || []), ...(userFabrics || [])], [globalFabrics, userFabrics]);
+  const fabrics = useMemo(() => allFabrics.filter((f) => pattern?.fabricIds.includes(f.id)), [allFabrics, pattern]);
+
+  const projectsQuery = useMemoFirebase(() => 
+    firestore && userId && pattern?.id ? query(collection(firestore, 'users', userId, 'projects'), where('patternIds', 'array-contains', pattern.id)) : null
+  , [firestore, userId, pattern?.id]);
+  const { data: relatedProjects } = useCollection<Project>(projectsQuery);
+
+
+  if (patternLoading) {
+    return <div>Wird geladen...</div>;
+  }
 
   if (!pattern) {
     notFound();
   }
 
-  const handleDelete = () => {
-    // Here you would typically call an API to delete the pattern.
-    console.log(`Deleting pattern ${pattern.id}`);
-    toast({
-      title: 'Schnittmuster gelöscht',
-      description: `"${pattern.title}" wurde erfolgreich entfernt.`,
-    });
-    router.push('/patterns');
-  };
-
-  const creator = CREATORS.find((c) => c.id === pattern.creatorId);
-  const targetGroup = TARGET_GROUPS.find((tg) => tg.id === pattern.targetGroupId);
-  const categories = CATEGORIES.filter((c) => pattern.categoryIds.includes(c.id));
-  const fabrics = FABRICS.filter((f) => pattern.fabricIds.includes(f.id));
-  const relatedProjects = PROJECTS.filter(proj => proj.patternIds.includes(pattern.id));
 
   return (
     <div className="space-y-6">
@@ -222,7 +271,7 @@ export default function PatternDetailPage({
               </CardContent>
             </Card>
 
-            {relatedProjects.length > 0 && (
+            {relatedProjects && relatedProjects.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">

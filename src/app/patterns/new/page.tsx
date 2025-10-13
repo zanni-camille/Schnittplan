@@ -31,15 +31,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  CREATORS,
-  FABRICS,
-  CATEGORIES,
-  TARGET_GROUPS,
-} from '@/lib/placeholder-data';
 import { ArrowLeft, Save, Upload, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
+import { useUser } from '@/firebase/auth/use-user';
+import { useCollection, useFirestore } from '@/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import type { Category, Fabric, TargetGroup, Creator } from '@/lib/definitions';
+import { useMemoFirebase } from '@/firebase/hooks';
+
 
 const patternFormSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -58,12 +58,38 @@ type PatternFormValues = z.infer<typeof patternFormSchema>;
 export default function PatternNewPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useUser();
+  const firestore = useFirestore();
 
   const [imageUrl, setImageUrl] = useState<string>('https://picsum.photos/seed/newPattern/600/800');
+  const [imageHint, setImageHint] = useState<string>('placeholder image');
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const instructionPdfInputRef = useRef<HTMLInputElement>(null);
   const additionalPdfInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const userId = user?.uid || 'user-1';
+
+  const globalCategoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
+  const userCategoriesQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'categories') : null, [firestore, userId]);
+  const { data: globalCategories } = useCollection<Category>(globalCategoriesQuery);
+  const { data: userCategories } = useCollection<Category>(userCategoriesQuery);
+  const allCategories = useMemo(() => [...(globalCategories || []), ...(userCategories || [])], [globalCategories, userCategories]);
+
+  const globalFabricsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'fabrics') : null, [firestore]);
+  const userFabricsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'fabrics') : null, [firestore, userId]);
+  const { data: globalFabrics } = useCollection<Fabric>(globalFabricsQuery);
+  const { data: userFabrics } = useCollection<Fabric>(userFabricsQuery);
+  const allFabrics = useMemo(() => [...(globalFabrics || []), ...(userFabrics || [])], [globalFabrics, userFabrics]);
+
+  const globalTargetGroupsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'targetGroups') : null, [firestore]);
+  const userTargetGroupsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'targetGroups') : null, [firestore, userId]);
+  const { data: globalTargetGroups } = useCollection<TargetGroup>(globalTargetGroupsQuery);
+  const { data: userTargetGroups } = useCollection<TargetGroup>(userTargetGroupsQuery);
+  const allTargetGroups = useMemo(() => [...(globalTargetGroups || []), ...(userTargetGroups || [])], [globalTargetGroups, userTargetGroups]);
+
+  const userCreatorsQuery = useMemoFirebase(() => firestore && userId ? collection(firestore, 'users', userId, 'creators') : null, [firestore, userId]);
+  const { data: creators } = useCollection<Creator>(userCreatorsQuery);
 
   const form = useForm<PatternFormValues>({
     resolver: zodResolver(patternFormSchema),
@@ -81,21 +107,39 @@ export default function PatternNewPage() {
     name: 'additionalPdfUrls'
   });
 
-  function onSubmit(data: PatternFormValues) {
-    const newId = `pat-${Date.now()}`;
-    console.log("Creating new pattern:", { id: newId, ...data });
-    toast({
-      title: 'Gespeichert!',
-      description: `Schnittmuster "${data.title}" wurde erfolgreich erstellt.`,
-    });
-    // Here you would typically call an API to save the data
-    // For now, we just log it and redirect.
-    router.push(`/patterns`);
+  async function onSubmit(data: PatternFormValues) {
+    if (!firestore || !userId) return;
+
+    const patternCollection = collection(firestore, 'users', userId, 'patterns');
+    
+    try {
+      await addDoc(patternCollection, {
+        ...data,
+        imageUrl,
+        imageHint,
+        additionalPdfUrls: data.additionalPdfUrls?.map(url => url.value).filter(Boolean),
+      });
+
+      toast({
+        title: 'Gespeichert!',
+        description: `Schnittmuster "${data.title}" wurde erfolgreich erstellt.`,
+      });
+      router.push(`/patterns`);
+    } catch (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Schnittmuster konnte nicht gespeichert werden.',
+      });
+      console.error("Error adding document: ", error);
+    }
   }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const file = event.target.files?.[0];
     if (file) {
+      // In a real app, you'd upload this file to Firebase Storage and get a URL.
+      // For now, we'll just use the file name as a placeholder.
       field.onChange(file.name);
     }
   };
@@ -103,12 +147,13 @@ export default function PatternNewPage() {
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // In a real app, you'd upload this file to Firebase Storage.
       const reader = new FileReader();
       reader.onload = (e) => {
         setImageUrl(e.target?.result as string);
+        setImageHint(file.name.split('.')[0] || 'uploaded image');
       };
       reader.readAsDataURL(file);
-      console.log("Selected image:", file.name);
     }
   };
 
@@ -138,7 +183,7 @@ export default function PatternNewPage() {
                         alt="Neues Schnittmuster"
                         fill
                         className="object-cover"
-                        data-ai-hint="placeholder image"
+                        data-ai-hint={imageHint}
                     />
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button type="button" onClick={() => imageInputRef.current?.click()}>
@@ -210,7 +255,7 @@ export default function PatternNewPage() {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {CREATORS.map(creator => (
+                                        {creators?.map(creator => (
                                             <SelectItem key={creator.id} value={creator.id}>{creator.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -233,7 +278,7 @@ export default function PatternNewPage() {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {TARGET_GROUPS.map(group => (
+                                        {allTargetGroups.map(group => (
                                             <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -250,7 +295,7 @@ export default function PatternNewPage() {
                         <FormItem>
                           <FormLabel>Kategorien</FormLabel>
                           <div className="space-y-2">
-                            {CATEGORIES.map((item) => (
+                            {allCategories.map((item) => (
                               <FormField
                                 key={item.id}
                                 control={form.control}
@@ -296,7 +341,7 @@ export default function PatternNewPage() {
                         <FormItem>
                           <FormLabel>Stoffempfehlungen</FormLabel>
                            <div className="space-y-2">
-                            {FABRICS.map((item) => (
+                            {allFabrics.map((item) => (
                               <FormField
                                 key={item.id}
                                 control={form.control}
@@ -389,7 +434,7 @@ export default function PatternNewPage() {
                                             <FormControl>
                                                 <div className="flex items-center gap-2">
                                                     <Input {...formField} placeholder={`Keine Datei ausgewählt`} readOnly />
-                                                    <Button type="button" variant="outline" size="icon" onClick={() => additionalPdfInputrefs.current[index]?.click()}>
+                                                    <Button type="button" variant="outline" size="icon" onClick={() => additionalPdfInputRefs.current[index]?.click()}>
                                                       <Upload className="h-4 w-4" />
                                                     </Button>
                                                     <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
