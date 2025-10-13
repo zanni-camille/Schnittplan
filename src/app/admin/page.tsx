@@ -29,15 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import {
-  CATEGORIES,
-  FABRICS,
-  TARGET_GROUPS,
-  PATTERNS,
-  Category,
-  Fabric,
-  TargetGroup,
-} from '@/lib/placeholder-data';
+import { PATTERNS } from '@/lib/placeholder-data';
 import { Pen, PlusCircle, Trash2, Save, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -47,11 +39,17 @@ type EditableItem = {
   name: string;
 };
 
+// Mock data, will be replaced by firestore data
+const TARGET_GROUPS: EditableItem[] = [];
+const CATEGORIES: EditableItem[] = [];
+const FABRICS: EditableItem[] = [];
+
+
 export default function AdminPage() {
   const { toast } = useToast();
-  const [targetGroups, setTargetGroups] = useState<TargetGroup[]>(TARGET_GROUPS);
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
-  const [fabrics, setFabrics] = useState<Fabric[]>(FABRICS);
+  const [targetGroups, setTargetGroups] = useState<EditableItem[]>(TARGET_GROUPS);
+  const [categories, setCategories] = useState<EditableItem[]>(CATEGORIES);
+  const [fabrics, setFabrics] = useState<EditableItem[]>(FABRICS);
   
   const [newTargetGroup, setNewTargetGroup] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState<string | null>(null);
@@ -59,7 +57,7 @@ export default function AdminPage() {
 
   const [editingItem, setEditingItem] = useState<{ id: string, name: string } | null>(null);
 
-  const isEditing = newTargetGroup !== null || newCategory !== null || newFabric !== null || editingItem !== null;
+  const isEditing = newTargetGroup !== null || newCategory !== null || editingItem !== null;
 
   const handleAddNew = (
     setter: React.Dispatch<React.SetStateAction<string | null>>
