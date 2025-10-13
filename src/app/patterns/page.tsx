@@ -83,8 +83,8 @@ export default function PatternsPage() {
 
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="relative sm:col-span-2 md:col-span-3 lg:col-span-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[1fr_auto_auto_auto_auto] gap-4 items-center">
+            <div className="relative lg:col-span-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Suchen..." 
@@ -129,7 +129,7 @@ export default function PatternsPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={handleResetFilters} className="w-full">
+                  <Button variant="ghost" size="icon" onClick={handleResetFilters}>
                     <RotateCcw className="h-4 w-4" />
                     <span className="sr-only">Filter zurücksetzen</span>
                   </Button>
