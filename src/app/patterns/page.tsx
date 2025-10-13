@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PATTERNS, CATEGORIES, FABRICS, CREATORS } from '@/lib/placeholder-data';
-import { PlusCircle, Search } from 'lucide-react';
+import { PlusCircle, Search, RotateCcw } from 'lucide-react';
 
 export default function PatternsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,6 +55,13 @@ export default function PatternsPage() {
     setSelectedCreator(value === 'all' ? null : value);
   };
 
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory(null);
+    setSelectedFabric(null);
+    setSelectedCreator(null);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -74,8 +81,8 @@ export default function PatternsPage() {
 
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="relative lg:col-span-2">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Schnittmuster suchen..." 
@@ -117,6 +124,10 @@ export default function PatternsPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Button variant="ghost" onClick={handleResetFilters} className="w-full">
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Zurücksetzen
+            </Button>
           </div>
         </CardContent>
       </Card>
