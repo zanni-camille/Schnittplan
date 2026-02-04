@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -20,13 +21,14 @@ import {
 import { useCollection, useFirestore, useUser } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Pattern, Category, Fabric, Creator } from '@/lib/definitions';
-import { PlusCircle, Search, RotateCcw } from 'lucide-react';
+import { PlusCircle, Search, RotateCcw, Scissors } from 'lucide-react';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useMemoFirebase } from '@/firebase/hooks';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 export default function PatternsPage() {
-  const { user, loading: userLoading } = useUser();
+  const { user } = useUser();
   const firestore = useFirestore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,7 +36,7 @@ export default function PatternsPage() {
   const [selectedFabric, setSelectedFabric] = useState<string | null>(null);
   const [selectedCreator, setSelectedCreator] = useState<string | null>(null);
 
-  const userId = user?.uid || 'user-1'; // Temporary fallback for development
+  const userId = user?.uid || 'user-1';
 
   const patternsQuery = useMemoFirebase(() => 
     firestore && userId ? query(collection(firestore, 'users', userId, 'patterns')) : null
@@ -61,9 +63,9 @@ export default function PatternsPage() {
 
 
   const filteredPatterns = useMemo(() => {
-    if (!patterns || !creators) return [];
+    if (!patterns) return [];
     return patterns.filter((pattern) => {
-      const creator = creators.find(c => c.id === pattern.creatorId);
+      const creator = creators?.find(c => c.id === pattern.creatorId);
       const matchesSearch =
         pattern.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (creator && creator.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -128,7 +130,7 @@ export default function PatternsPage() {
             </div>
             <Select onValueChange={handleSetCategory} value={selectedCategory || 'all'}>
               <SelectTrigger>
-                <SelectValue placeholder="Nach Kategorie filtern" />
+                <SelectValue placeholder="Kategorie" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle Kategorien</SelectItem>
@@ -139,7 +141,7 @@ export default function PatternsPage() {
             </Select>
             <Select onValueChange={handleSetFabric} value={selectedFabric || 'all'}>
               <SelectTrigger>
-                <SelectValue placeholder="Nach Stoff filtern" />
+                <SelectValue placeholder="Stoff" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle Stoffe</SelectItem>
@@ -150,7 +152,7 @@ export default function PatternsPage() {
             </Select>
              <Select onValueChange={handleSetCreator} value={selectedCreator || 'all'}>
               <SelectTrigger>
-                <SelectValue placeholder="Nach Designer filtern" />
+                <SelectValue placeholder="Designer" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle Designer</SelectItem>
@@ -162,7 +164,7 @@ export default function PatternsPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={handleResetFilters}>
+                  <Button variant="ghost" size="icon" onClick={handleResetFilters} className="shrink-0">
                     <RotateCcw className="h-4 w-4" />
                     <span className="sr-only">Filter zurücksetzen</span>
                   </Button>
@@ -177,30 +179,49 @@ export default function PatternsPage() {
       </Card>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {filteredPatterns.map((pattern) => {
-          const creator = creators?.find(c => c.id === pattern.creatorId);
-          return (
-            <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
-              <Link href={`/patterns/${pattern.id}`} className="block">
-                <CardContent className="p-0">
-                  <div className="aspect-[3/4] relative">
-                    <Image
-                      src={pattern.imageUrl}
-                      alt={pattern.title}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-10"
-                      data-ai-hint={pattern.imageHint}
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="p-4 flex-col items-start">
-                    <h3 className="font-semibold truncate w-full">{pattern.title}</h3>
-                    <p className="text-sm text-muted-foreground">{creator?.name}</p>
-                </CardFooter>
-              </Link>
-            </Card>
-          );
-        })}
+        {patternsLoading ? (
+          [1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))
+        ) : filteredPatterns.length > 0 ? (
+          filteredPatterns.map((pattern) => {
+            const creator = creators?.find(c => c.id === pattern.creatorId);
+            return (
+              <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
+                <Link href={`/patterns/${pattern.id}`} className="block">
+                  <CardContent className="p-0">
+                    <div className="aspect-[3/4] relative">
+                      <Image
+                        src={pattern.imageUrl}
+                        alt={pattern.title}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-105"
+                        data-ai-hint={pattern.imageHint}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-4 flex-col items-start">
+                      <h3 className="font-semibold truncate w-full">{pattern.title}</h3>
+                      <p className="text-sm text-muted-foreground">{creator?.name}</p>
+                  </CardFooter>
+                </Link>
+              </Card>
+            );
+          })
+        ) : (
+          <div className="col-span-full py-20 text-center border-2 border-dashed rounded-xl bg-muted/10">
+            <Scissors className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+            <h3 className="text-xl font-semibold">Keine Schnittmuster gefunden</h3>
+            <p className="text-muted-foreground mt-2">Starte deine Sammlung durch Hinzufügen deines ersten Musters.</p>
+            <Button asChild className="mt-6">
+              <Link href="/patterns/new">Schnittmuster hinzufügen</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
