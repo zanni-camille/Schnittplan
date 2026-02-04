@@ -11,9 +11,8 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { PROJECTS } from '@/lib/placeholder-data';
-import { PlusCircle } from 'lucide-react';
-import { useState } from 'react';
+import { PlusCircle, FolderKanban } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import {
   Select,
   SelectContent,
@@ -21,22 +20,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useCollection, useFirestore, useUser } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
+import type { Project } from '@/lib/definitions';
 
 export default function ProjectsPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const userId = user?.uid || 'user-1';
+
   const [filter, setFilter] = useState('all');
 
-  const filteredProjects = PROJECTS.filter((project) => {
-    if (filter === 'all') {
+  const projectsQuery = useMemoFirebase(() => 
+    firestore && userId ? query(collection(firestore, 'users', userId, 'projects')) : null
+  , [firestore, userId]);
+  const { data: projects, loading } = useCollection<Project>(projectsQuery);
+
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+    return projects.filter((project) => {
+      if (filter === 'all') return true;
+      if (filter === 'planned') return project.progress === 0;
+      if (filter === 'started') return project.progress > 0 && project.progress < 100;
+      if (filter === 'finished') return project.progress === 100;
       return true;
-    } else if (filter === 'planned') {
-      return project.progress === 0;
-    } else if (filter === 'started') {
-      return project.progress > 0 && project.progress < 100;
-    } else if (filter === 'finished') {
-      return project.progress === 100;
-    }
-    return true;
-  });
+    });
+  }, [projects, filter]);
 
   return (
     <div className="space-y-8">
@@ -59,42 +69,54 @@ export default function ProjectsPage() {
               <SelectItem value="finished">Fertiggestellt</SelectItem>
             </SelectContent>
           </Select>
-          <Button>
+          <Button variant="default">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Projekt erstellen
+            Neues Projekt
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProjects.map((project) => (
-          <Card key={project.id} className="flex flex-col overflow-hidden group transition-shadow hover:shadow-xl">
-            <Link href={`/projects/${project.id}`} className="flex flex-col h-full">
-              {project.imageUrls && project.imageUrls.length > 0 && (
-                <div className="relative aspect-video">
-                  <Image
-                    src={project.imageUrls[0]}
-                    alt={project.name}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                    data-ai-hint={project.imageHints?.[0]}
-                  />
-                </div>
-              )}
-              <CardHeader>
-                <CardTitle>{project.name}</CardTitle>
-                <CardDescription className="line-clamp-2">{project.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <div className="space-y-2">
-                  <Progress value={project.progress} aria-label={`${project.progress}% abgeschlossen`} />
-                  <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
-                </div>
-              </CardContent>
-            </Link>
-          </Card>
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <Card key={i} className="h-64 animate-pulse bg-muted" />)}
+        </div>
+      ) : filteredProjects.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredProjects.map((project) => (
+            <Card key={project.id} className="flex flex-col overflow-hidden group transition-shadow hover:shadow-xl">
+              <Link href={`/projects/${project.id}`} className="flex flex-col h-full">
+                {project.imageUrls && project.imageUrls.length > 0 && (
+                  <div className="relative aspect-video">
+                    <Image
+                      src={project.imageUrls[0]}
+                      alt={project.name}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                    />
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle>{project.name}</CardTitle>
+                  <CardDescription className="line-clamp-2">{project.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <div className="space-y-2">
+                    <Progress value={project.progress} aria-label={`${project.progress}% abgeschlossen`} />
+                    <p className="text-sm text-muted-foreground">{project.progress}% abgeschlossen</p>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center">
+          <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold">Keine Projekte gefunden</h3>
+          <p className="text-muted-foreground mb-4">Du hast noch keine Projekte in dieser Kategorie.</p>
+          <Button variant="outline">Projekt erstellen</Button>
+        </Card>
+      )}
     </div>
   );
 }
