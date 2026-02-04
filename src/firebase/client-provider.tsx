@@ -42,18 +42,42 @@ export function FirebaseClientProvider({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-center p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground font-headline text-xl">Verbindung zur Datenbank wird hergestellt...</p>
+        <p className="text-muted-foreground font-headline text-xl italic">
+          Verbindung zur Datenbank wird hergestellt...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background p-4">
+        <div className="max-w-md w-full">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Firebase Fehler</AlertTitle>
+            <AlertDescription>
+              <p className="mt-2 text-sm">
+                Die Datenbank konnte nicht geladen werden. Bitte stelle sicher, dass du in der 
+                <strong> Firebase Console</strong> unter "Firestore Database" eine Datenbank erstellt hast.
+              </p>
+              <pre className="mt-4 p-2 bg-destructive/10 rounded text-[10px] overflow-auto">
+                {error.message}
+              </pre>
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
 
   return (
     <FirebaseProvider
-      app={firebase?.app as FirebaseApp}
-      auth={firebase?.auth as Auth}
-      firestore={firebase?.firestore as Firestore}
+      app={firebase!.app}
+      auth={firebase!.auth}
+      firestore={firebase!.firestore}
     >
       <SidebarProvider>
         <div className="relative flex min-h-screen w-full">
@@ -61,25 +85,7 @@ export function FirebaseClientProvider({
           <div className="flex-1 flex flex-col min-w-0">
             <SiteHeader />
             <main className="flex-grow p-4 sm:p-6 lg:p-8">
-              {error ? (
-                <div className="max-w-2xl mx-auto mt-8">
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Konfigurationsfehler</AlertTitle>
-                    <AlertDescription>
-                      <p className="mb-2">Die Firebase-Datenbank konnte nicht initialisiert werden.</p>
-                      <code className="text-xs bg-destructive/10 p-2 rounded block overflow-auto">
-                        {error.message}
-                      </code>
-                      <p className="mt-4 text-sm">
-                        Bitte stelle sicher, dass <strong>Firestore</strong> in deinem Firebase-Projekt aktiviert wurde.
-                      </p>
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              ) : (
-                children
-              )}
+              {children}
             </main>
           </div>
         </div>
