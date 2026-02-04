@@ -26,17 +26,13 @@ export {
   FirebaseClientProvider,
 } from './client-provider';
 
-// This is a trick to get the Firebase config from the server.
-// It is only available on the client.
-const firebaseConfigPromise = getFirebaseConfig();
-
 export async function initializeFirebase(): Promise<{
   app: FirebaseApp;
   auth: Auth;
   firestore: Firestore;
 }> {
   try {
-    const config = await firebaseConfigPromise;
+    const config = await getFirebaseConfig();
     const apps = getApps();
     const app = apps.length > 0 ? apps[0] : initializeApp(config);
     const auth = getAuth(app);

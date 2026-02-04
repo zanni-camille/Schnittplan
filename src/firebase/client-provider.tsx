@@ -12,7 +12,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { SiteSidebar } from '@/components/layout/site-sidebar';
 import { SiteHeader } from '@/components/layout/site-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 export function FirebaseClientProvider({
   children,
@@ -25,15 +25,29 @@ export function FirebaseClientProvider({
     firestore: Firestore;
   } | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     initializeFirebase()
-      .then(setFirebase)
+      .then((fb) => {
+        setFirebase(fb);
+        setLoading(false);
+      })
       .catch((err) => {
         console.error("Failed to initialize Firebase", err);
         setError(err);
+        setLoading(false);
       });
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground font-headline text-xl">SchnittPlan wird geladen...</p>
+      </div>
+    );
+  }
 
   return (
     <FirebaseProvider
@@ -51,10 +65,15 @@ export function FirebaseClientProvider({
                 <div className="max-w-2xl mx-auto mt-8">
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Firebase-Verbindung fehlgeschlagen</AlertTitle>
+                    <AlertTitle>Datenbank-Verbindung fehlgeschlagen</AlertTitle>
                     <AlertDescription>
-                      Die App konnte keine Verbindung zur Datenbank herstellen. Bitte laden Sie die Seite neu oder prüfen Sie Ihre Internetverbindung.
-                      <pre className="mt-2 text-xs overflow-auto">{error.message}</pre>
+                      <p className="mb-2">Die App konnte keine Verbindung zur Cloud-Datenbank herstellen.</p>
+                      <code className="text-xs bg-destructive/10 p-2 rounded block overflow-auto">
+                        {error.message}
+                      </code>
+                      <p className="mt-4 text-sm italic">
+                        Hinweis: Stellen Sie sicher, dass Ihr Firebase-Projekt korrekt konfiguriert ist.
+                      </p>
                     </AlertDescription>
                   </Alert>
                 </div>
