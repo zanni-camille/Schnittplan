@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PlusCircle, Scissors, FolderKanban } from 'lucide-react';
 import { useCollection, useFirestore, useUser } from '@/firebase';
-import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { collection, query, limit } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
 import type { Pattern, Project } from '@/lib/definitions';
 
@@ -33,7 +34,7 @@ export default function DashboardPage() {
   const { data: recentPatterns, loading: patternsLoading } = useCollection<Pattern>(patternsQuery);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">
@@ -66,7 +67,9 @@ export default function DashboardPage() {
         </h2>
         {projectsLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => <Card key={i} className="h-48 animate-pulse bg-muted" />)}
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="h-48 animate-pulse bg-muted/50 border-dashed" />
+            ))}
           </div>
         ) : activeProjects && activeProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -98,7 +101,7 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center">
+          <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center bg-muted/20">
             <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold">Noch keine Projekte</h3>
             <p className="text-muted-foreground mb-4">Starte dein erstes Nähprojekt!</p>
@@ -116,7 +119,9 @@ export default function DashboardPage() {
         </h2>
         {patternsLoading ? (
            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => <Card key={i} className="aspect-[3/4] animate-pulse bg-muted" />)}
+            {[1, 2, 3, 4].map(i => (
+              <Card key={i} className="aspect-[3/4] animate-pulse bg-muted/50 border-dashed" />
+            ))}
           </div>
         ) : recentPatterns && recentPatterns.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -142,7 +147,7 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center">
+          <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center bg-muted/20">
             <Scissors className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold">Keine Schnittmuster gefunden</h3>
             <p className="text-muted-foreground mb-4">Füge deine Schnittmuster zur Bibliothek hinzu.</p>

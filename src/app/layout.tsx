@@ -1,10 +1,8 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { SiteSidebar } from '@/components/layout/site-sidebar';
-import { SiteHeader } from '@/components/layout/site-header';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
@@ -26,18 +24,8 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased min-h-screen bg-background')}>
         <FirebaseClientProvider>
-          <SidebarProvider>
-            <div className="relative flex min-h-screen w-full">
-              <SiteSidebar />
-              <div className="flex-1 flex flex-col min-w-0">
-                <SiteHeader />
-                <main className="flex-grow p-4 sm:p-6 lg:p-8">
-                  {children}
-                </main>
-              </div>
-            </div>
-            <Toaster />
-          </SidebarProvider>
+          {children}
+          <Toaster />
         </FirebaseClientProvider>
       </body>
     </html>
