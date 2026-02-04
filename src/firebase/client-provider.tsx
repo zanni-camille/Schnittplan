@@ -8,7 +8,6 @@ import type { Firestore } from 'firebase/firestore';
 
 import { initializeFirebase } from '.';
 import { FirebaseProvider } from './provider';
-import { Loader2 } from 'lucide-react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { SiteSidebar } from '@/components/layout/site-sidebar';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -25,11 +24,12 @@ export function FirebaseClientProvider({
   } | null>(null);
 
   useEffect(() => {
+    // Initialisierung erfolgt im Hintergrund
     initializeFirebase().then(setFirebase);
   }, []);
 
-  // Wir rendern die Shell (Navigation) immer, damit der Nutzer nicht vor einem leeren Bildschirm steht.
-  // Nur der Inhalt der 'main'-Sektion wartet auf Firebase.
+  // Wir rendern die Shell (Navigation) immer sofort.
+  // Die FirebaseProvider erhält die Instanzen, sobald sie verfügbar sind.
   return (
     <FirebaseProvider
       app={firebase?.app as FirebaseApp}
@@ -42,16 +42,9 @@ export function FirebaseClientProvider({
           <div className="flex-1 flex flex-col min-w-0">
             <SiteHeader />
             <main className="flex-grow p-4 sm:p-6 lg:p-8">
-              {!firebase ? (
-                <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground animate-pulse font-headline">
-                    Datenbank wird verbunden...
-                  </p>
-                </div>
-              ) : (
-                children
-              )}
+              {/* Wir zeigen die children (die Seite) sofort an. 
+                  Die Komponenten darin kümmern sich selbst um ihre Ladezustände. */}
+              {children}
             </main>
           </div>
         </div>

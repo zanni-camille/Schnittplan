@@ -18,7 +18,7 @@ export function useCollection<T extends DocumentData>(
 ) {
   const [snapshot, setSnapshot] = useState<QuerySnapshot<T> | null>(null);
   const [data, setData] = useState<(T & WithId)[] | null>(null);
-  // Wenn die Query noch null ist (während Firebase initialisiert), setzen wir loading auf true.
+  // Initial auf true, falls die Query noch nicht bereit ist
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
