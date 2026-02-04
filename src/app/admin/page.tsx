@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -32,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Pen, PlusCircle, Trash2, Save, XCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
 import type { Category, Fabric, TargetGroup } from '@/lib/definitions';
@@ -41,7 +40,6 @@ export default function AdminPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  // Firestore Queries für globale Listen (ohne userId)
   const catQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const fabQuery = useMemoFirebase(() => firestore ? collection(firestore, 'fabrics') : null, [firestore]);
   const tgQuery = useMemoFirebase(() => firestore ? collection(firestore, 'targetGroups') : null, [firestore]);
@@ -63,40 +61,62 @@ export default function AdminPage() {
     setter('');
   };
 
-  const handleSaveNew = async (collectionName: string, value: string | null, setter: React.Dispatch<React.SetStateAction<string | null>>) => {
+  const handleSaveNew = (collectionName: string, value: string | null, setter: React.Dispatch<React.SetStateAction<string | null>>) => {
     if (!value?.trim() || !firestore) return;
 
     const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
-    try {
-      await addDoc(collection(firestore, collectionName), { name: formattedValue });
-      setter(null);
-      toast({ title: 'Gespeichert!', description: `"${formattedValue}" wurde hinzugefügt.` });
-    } catch (e) {
-      toast({ variant: 'destructive', title: 'Fehler', description: 'Konnte nicht gespeichert werden.' });
-    }
+    const colRef = collection(firestore, collectionName);
+    const data = { name: formattedValue };
+
+    addDoc(colRef, data)
+      .then(() => {
+        setter(null);
+        toast({ title: 'Gespeichert!', description: `"${formattedValue}" wurde hinzugefügt.` });
+      })
+      .catch(async (err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: colRef.path,
+          operation: 'create',
+          requestResourceData: data,
+        }));
+      });
   };
 
-  const handleUpdate = async (collectionName: string) => {
+  const handleUpdate = (collectionName: string) => {
     if (!editingItem || !firestore || !editingItem.name.trim()) return;
 
     const formattedValue = editingItem.name.charAt(0).toUpperCase() + editingItem.name.slice(1);
-    try {
-      await updateDoc(doc(firestore, collectionName, editingItem.id), { name: formattedValue });
-      setEditingItem(null);
-      toast({ title: 'Aktualisiert!', description: 'Eintrag wurde erfolgreich umbenannt.' });
-    } catch (e) {
-      toast({ variant: 'destructive', title: 'Fehler', description: 'Update fehlgeschlagen.' });
-    }
+    const docRef = doc(firestore, collectionName, editingItem.id);
+    const data = { name: formattedValue };
+
+    updateDoc(docRef, data)
+      .then(() => {
+        setEditingItem(null);
+        toast({ title: 'Aktualisiert!', description: 'Eintrag wurde erfolgreich umbenannt.' });
+      })
+      .catch(async (err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: data,
+        }));
+      });
   };
 
-  const handleDelete = async (collectionName: string, id: string, name: string) => {
+  const handleDelete = (collectionName: string, id: string, name: string) => {
     if (!firestore) return;
-    try {
-      await deleteDoc(doc(firestore, collectionName, id));
-      toast({ title: 'Gelöscht!', description: `"${name}" wurde entfernt.` });
-    } catch (e) {
-      toast({ variant: 'destructive', title: 'Fehler', description: 'Konnte nicht gelöscht werden.' });
-    }
+    const docRef = doc(firestore, collectionName, id);
+
+    deleteDoc(docRef)
+      .then(() => {
+        toast({ title: 'Gelöscht!', description: `"${name}" wurde entfernt.` });
+      })
+      .catch(async (err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        }));
+      });
   };
 
   const renderList = (title: string, data: any[] | null, loading: boolean, collectionName: string, newValue: string | null, setNewValue: React.Dispatch<React.SetStateAction<string | null>>) => (

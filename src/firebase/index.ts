@@ -1,4 +1,3 @@
-
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
@@ -25,6 +24,9 @@ export {
 export {
   FirebaseClientProvider,
 } from './client-provider';
+
+export { errorEmitter } from './error-emitter';
+export { FirestorePermissionError } from './errors';
 
 export async function initializeFirebase(): Promise<{
   app: FirebaseApp;

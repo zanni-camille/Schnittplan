@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -13,6 +12,7 @@ import { SiteSidebar } from '@/components/layout/site-sidebar';
 import { SiteHeader } from '@/components/layout/site-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 export function FirebaseClientProvider({
   children,
@@ -60,8 +60,7 @@ export function FirebaseClientProvider({
             <AlertTitle>Firebase Fehler</AlertTitle>
             <AlertDescription>
               <p className="mt-2 text-sm">
-                Die Datenbank konnte nicht geladen werden. Bitte stelle sicher, dass du in der 
-                <strong> Firebase Console</strong> unter "Firestore Database" eine Datenbank erstellt hast.
+                Die Datenbank konnte nicht geladen werden. Bitte stelle sicher, dass Firestore in der Console aktiviert ist.
               </p>
               <pre className="mt-4 p-2 bg-destructive/10 rounded text-[10px] overflow-auto">
                 {error.message}
@@ -89,6 +88,7 @@ export function FirebaseClientProvider({
             </main>
           </div>
         </div>
+        <FirebaseErrorListener />
       </SidebarProvider>
     </FirebaseProvider>
   );
