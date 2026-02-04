@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Pen, PlusCircle, Trash2, Save, XCircle, Loader2, Database } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useCollection, useFirestore, errorEmitter, FirestorePermissionError, useUser } from '@/firebase';
+import { useCollection, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
 import type { Category, Fabric, TargetGroup } from '@/lib/definitions';
@@ -40,8 +40,6 @@ import { CATEGORIES, FABRICS, TARGET_GROUPS } from '@/lib/placeholder-data';
 export default function AdminPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { user } = useUser();
-  const userId = user?.uid || 'user-1';
 
   const catQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const fabQuery = useMemoFirebase(() => firestore ? collection(firestore, 'fabrics') : null, [firestore]);
@@ -56,12 +54,11 @@ export default function AdminPage() {
   const [newFabric, setNewFabric] = useState<string | null>(null);
   const [isSeeding, setIsSeeding] = useState(false);
 
-  const [editingItem, setEditingItem] = useState<{ id: string, name: string, type: 'categories' | 'fabrics' | 'targetGroups' } | null>(null);
+  const [editingItem, setEditingItem] = useState<{ id: string, name: string, type: string } | null>(null);
 
-  const isEditing = newTargetGroup !== null || newCategory !== null || newFabric !== null || editingItem !== null || isSeeding;
+  const isOperationInProgress = newTargetGroup !== null || newCategory !== null || newFabric !== null || editingItem !== null || isSeeding;
 
   const handleAddNew = (setter: React.Dispatch<React.SetStateAction<string | null>>) => {
-    if (isEditing) return;
     setter('');
   };
 
@@ -89,7 +86,7 @@ export default function AdminPage() {
       toast({
         variant: "destructive",
         title: "Fehler beim Initialisieren",
-        description: "Stelle sicher, dass Firestore im Produktions- oder Testmodus aktiv ist.",
+        description: "Stelle sicher, dass Firestore aktiv ist und Schreibzugriff erlaubt ist.",
       });
     } finally {
       setIsSeeding(false);
@@ -154,7 +151,7 @@ export default function AdminPage() {
       });
   };
 
-  const renderList = (title: string, data: any[] | null, loading: boolean, collectionName: 'categories' | 'fabrics' | 'targetGroups', newValue: string | null, setNewValue: React.Dispatch<React.SetStateAction<string | null>>) => (
+  const renderList = (title: string, data: any[] | null, loading: boolean, collectionName: string, newValue: string | null, setNewValue: React.Dispatch<React.SetStateAction<string | null>>) => (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
@@ -180,10 +177,10 @@ export default function AdminPage() {
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => setEditingItem({ ...item, type: collectionName })} disabled={isEditing}><Pen className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => setEditingItem({ ...item, type: collectionName })} disabled={isOperationInProgress}><Pen className="h-4 w-4" /></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive" disabled={isEditing}><Trash2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="text-destructive" disabled={isOperationInProgress}><Trash2 className="h-4 w-4" /></Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
@@ -212,7 +209,7 @@ export default function AdminPage() {
             </TableBody>
           </Table>
         )}
-        <Button size="sm" onClick={() => handleAddNew(setNewValue)} disabled={isEditing} className="w-full mt-4"><PlusCircle className="mr-2 h-4 w-4" />Neu</Button>
+        <Button size="sm" onClick={() => handleAddNew(setNewValue)} disabled={isOperationInProgress} className="w-full mt-4"><PlusCircle className="mr-2 h-4 w-4" />Neu</Button>
       </CardContent>
     </Card>
   );
@@ -221,10 +218,10 @@ export default function AdminPage() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-headline">Globale Stammdaten</h1>
-          <p className="text-muted-foreground">Verwalte die Kategorien und Stoffe, die für alle Benutzer sichtbar sind.</p>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Stammdaten Verwaltung</h1>
+          <p className="text-muted-foreground">Verwalte Zielgruppen, Kategorien und Stoffe für deine Bibliothek.</p>
         </div>
-        <Button variant="outline" onClick={handleSeedData} disabled={isEditing}>
+        <Button variant="outline" onClick={handleSeedData} disabled={isOperationInProgress}>
           {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
           Testdaten initialisieren
         </Button>
