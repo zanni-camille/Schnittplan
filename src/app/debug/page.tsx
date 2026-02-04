@@ -5,10 +5,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useFirebase, useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, getDocs, limit, query, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
-import { CheckCircle2, XCircle, Loader2, Database, ShieldAlert, Wifi, RefreshCcw } from 'lucide-react';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
+import { CheckCircle2, XCircle, Loader2, Database, ShieldAlert, Wifi, RefreshCcw, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 export default function DebugPage() {
   const { toast } = useToast();
@@ -33,11 +34,11 @@ export default function DebugPage() {
           configData: {
             projectId: parsed.projectId,
             authDomain: parsed.authDomain,
-            region: "Zürich (europe-west12/3)" // Manuelle Info aus User-Prompt
+            region: "Zürich (europe-west12)"
           },
         });
       } catch (e) {
-        setConfigInfo({ envFound: false, configData: "Fehler beim Parsen" });
+        setConfigInfo({ envFound: false, configData: "Fehler beim Parsen der Umgebungsvariable" });
       }
     }
   }, []);
@@ -54,7 +55,6 @@ export default function DebugPage() {
     setDbStatus('idle');
 
     try {
-      // Test-Dokument erstellen
       const testCol = collection(firestore, '_debug_test');
       const testDoc = await addDoc(testCol, {
         timestamp: serverTimestamp(),
@@ -62,7 +62,6 @@ export default function DebugPage() {
         user: user?.uid || 'anonymous'
       });
       
-      // Test-Dokument wieder löschen
       await deleteDoc(doc(firestore, '_debug_test', testDoc.id));
 
       setDbStatus('success');
@@ -91,38 +90,50 @@ export default function DebugPage() {
         </Button>
       </div>
 
+      {!configInfo.envFound && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5" />
+              Konfiguration fehlt (404)
+            </CardTitle>
+            <CardDescription>
+              Die App kann keine Verbindung zu Firebase herstellen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-background rounded-lg border text-sm space-y-2">
+              <p className="font-bold">Lösungsschritte:</p>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                <li>Klicke in Firebase Studio oben auf das <strong>Firebase-Icon</strong> oder die <strong>Einstellungen</strong>.</li>
+                <li>Stelle sicher, dass ein aktives Projekt ausgewählt ist.</li>
+                <li>Falls bereits verknüpft, klicke auf "Projekt aktualisieren" oder "Verbindung neu laden".</li>
+              </ol>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="shadow-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-blue-500" />
-              Umgebung & Konfig
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Info className="h-5 w-5 text-blue-500" />
+              Status-Details
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <p className="text-xs font-bold uppercase text-muted-foreground">Status</p>
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <span>Konfigurations-Variable:</span>
-                <Badge variant={configInfo.envFound ? "default" : "destructive"}>
-                  {configInfo.envFound ? "Aktiv" : "Fehlt"}
-                </Badge>
-              </div>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg text-sm">
+              <span>Umgebungsvariable:</span>
+              <Badge variant={configInfo.envFound ? "default" : "destructive"}>
+                {configInfo.envFound ? "Gefunden" : "Fehlt"}
+              </Badge>
             </div>
             
             {configInfo.configData && (
-              <div className="space-y-2">
-                <p className="text-xs font-bold uppercase text-muted-foreground">Details</p>
-                <div className="p-3 bg-muted/30 rounded-lg text-sm font-mono space-y-1">
-                  <p>Projekt: {configInfo.configData.projectId}</p>
-                  <p>Region: {configInfo.configData.region}</p>
-                </div>
-              </div>
-            )}
-            
-            {!configInfo.envFound && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
-                Warnung: Die App erhält keine Konfigurationsdaten. Bitte stelle sicher, dass das Firebase-Projekt verknüpft ist.
+              <div className="p-3 bg-muted/30 rounded-lg text-xs font-mono space-y-1">
+                <p>Projekt-ID: {configInfo.configData.projectId}</p>
+                <p>Region: {configInfo.configData.region}</p>
               </div>
             )}
           </CardContent>
@@ -130,30 +141,26 @@ export default function DebugPage() {
 
         <Card className="shadow-md">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <Database className="h-5 w-5 text-orange-500" />
-              Funktionstest
+              Live-Test
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-center py-4">
+          <CardContent className="space-y-4 text-center">
             {dbStatus === 'success' ? (
-              <div className="py-6 flex flex-col items-center gap-3">
-                <CheckCircle2 className="h-16 w-16 text-green-500" />
-                <h3 className="text-xl font-bold">Alles OK!</h3>
-                <p className="text-sm text-muted-foreground">Die Test-Operation (Schreiben & Löschen) war erfolgreich.</p>
+              <div className="py-4 flex flex-col items-center gap-2">
+                <CheckCircle2 className="h-12 w-12 text-green-500" />
+                <h3 className="font-bold">Verbunden</h3>
               </div>
             ) : dbStatus === 'error' ? (
-              <div className="py-6 flex flex-col items-center gap-3">
-                <XCircle className="h-16 w-16 text-destructive" />
-                <h3 className="text-xl font-bold">Fehler</h3>
-                <p className="text-sm text-destructive max-w-full overflow-hidden text-ellipsis px-4">
-                  {errorMsg}
-                </p>
+              <div className="py-4 flex flex-col items-center gap-2">
+                <XCircle className="h-12 w-12 text-destructive" />
+                <p className="text-xs text-destructive px-2 line-clamp-3">{errorMsg}</p>
               </div>
             ) : (
-              <div className="py-6 flex flex-col items-center gap-3">
-                <Loader2 className={cn("h-16 w-16 text-primary", isTesting && "animate-spin")} />
-                <p className="text-sm text-muted-foreground">Bereit für den Verbindungstest.</p>
+              <div className="py-4 flex flex-col items-center gap-2">
+                <Loader2 className={cn("h-12 w-12 text-muted-foreground", isTesting && "animate-spin")} />
+                <p className="text-xs text-muted-foreground">Warte auf Test...</p>
               </div>
             )}
 
@@ -162,20 +169,11 @@ export default function DebugPage() {
               onClick={handleTestConnection} 
               disabled={isTesting || !firestore}
             >
-              {isTesting ? "Test läuft..." : "Verbindung jetzt testen"}
+              {isTesting ? "Teste..." : "Verbindung prüfen"}
             </Button>
           </CardContent>
         </Card>
       </div>
-
-      <Card className="bg-primary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-sm font-bold uppercase">Pro-Tipp für den Testmodus</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Da du die Datenbank im <strong>Testmodus</strong> erstellt hast, sind die Schreibrechte für 30 Tage offen. Sobald der Test hier "Erfolgreich" anzeigt, kannst du im <strong>Verwaltungs-Tab</strong> die Standarddaten (Kategorien etc.) generieren.
-        </CardContent>
-      </Card>
     </div>
   );
 }

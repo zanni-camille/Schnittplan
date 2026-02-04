@@ -13,21 +13,27 @@ export async function getFirebaseConfig() {
     return promise;
   }
 
-  const config = process.env.NEXT_PUBLIC_FIREBASE_CONFIG;
-  if (config) {
+  // First try: Environment Variable (usually set in Firebase Studio)
+  const configEnv = process.env.NEXT_PUBLIC_FIREBASE_CONFIG;
+  if (configEnv) {
     try {
-      promise = Promise.resolve(JSON.parse(config));
-      return promise;
+      const parsed = JSON.parse(configEnv);
+      if (parsed && parsed.apiKey) {
+        console.log("Firebase config loaded from environment variable.");
+        promise = Promise.resolve(parsed);
+        return promise;
+      }
     } catch (e) {
-      console.error("Failed to parse NEXT_PUBLIC_FIREBASE_CONFIG", e);
+      console.error("Failed to parse NEXT_PUBLIC_FIREBASE_CONFIG env var", e);
     }
   }
 
-  // Fallback to fetching from the server
+  // Second try: Fetch from the local proxy endpoint
+  console.log("Fetching Firebase config from /__firebase/config...");
   promise = fetch('/__firebase/config')
     .then(async (res) => {
       if (!res.ok) {
-        throw new Error(`Konfiguration nicht gefunden (Status ${res.status}). Bitte stelle sicher, dass das Firebase-Projekt verknüpft ist.`);
+        throw new Error(`Konfigurations-Endpunkt nicht gefunden (Status ${res.status}). Bitte stelle sicher, dass das Firebase-Projekt in den Studio-Einstellungen verknüpft ist.`);
       }
       const contentType = res.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
