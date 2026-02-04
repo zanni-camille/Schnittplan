@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -57,14 +58,18 @@ export function FirebaseClientProvider({
         <div className="max-w-md w-full">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Firebase Fehler</AlertTitle>
+            <AlertTitle>Verbindungsfehler</AlertTitle>
             <AlertDescription>
               <p className="mt-2 text-sm">
-                Die Datenbank konnte nicht geladen werden. Bitte stelle sicher, dass Firestore in der Console aktiviert ist.
+                Die Firebase-Konfiguration konnte nicht geladen werden oder Firestore ist nicht aktiviert.
               </p>
-              <pre className="mt-4 p-2 bg-destructive/10 rounded text-[10px] overflow-auto">
-                {error.message}
-              </pre>
+              <div className="mt-4 p-2 bg-destructive/10 rounded text-[10px] overflow-auto">
+                <p className="font-bold mb-1 underline">Mögliche Ursachen:</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>Firestore wurde in der Firebase Console noch nicht erstellt.</li>
+                  <li>Das Projekt wurde noch nicht vollständig mit Firebase verknüpft.</li>
+                </ul>
+              </div>
             </AlertDescription>
           </Alert>
         </div>

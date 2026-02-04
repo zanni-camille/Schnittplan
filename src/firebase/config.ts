@@ -27,8 +27,6 @@ export async function getFirebaseConfig() {
   promise = fetch('/__firebase/config')
     .then(async (res) => {
       if (!res.ok) {
-        // If the config endpoint is not available, we return a rejected promise
-        // which will be handled by the caller.
         throw new Error(`Failed to fetch Firebase config: ${res.status} ${res.statusText}`);
       }
       const contentType = res.headers.get('content-type');
