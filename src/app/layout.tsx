@@ -27,9 +27,9 @@ export default function RootLayout({
       <body className={cn('font-body antialiased min-h-screen bg-background')}>
         <FirebaseClientProvider>
           <SidebarProvider>
-            <div className="relative flex">
+            <div className="relative flex min-h-screen w-full">
               <SiteSidebar />
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col min-w-0">
                 <SiteHeader />
                 <main className="flex-grow p-4 sm:p-6 lg:p-8">
                   {children}

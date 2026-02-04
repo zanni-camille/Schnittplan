@@ -7,6 +7,7 @@ import type { Firestore } from 'firebase/firestore';
 
 import { initializeFirebase } from '.';
 import { FirebaseProvider } from './provider';
+import { Loader2 } from 'lucide-react';
 
 export function FirebaseClientProvider({
   children,
@@ -24,8 +25,14 @@ export function FirebaseClientProvider({
   }, []);
 
   if (!firebase) {
-    // TODO: Add a loading spinner
-    return null;
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground animate-pulse font-headline">SchnittPlan wird vorbereitet...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
