@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -25,7 +26,7 @@ import {
 import { ArrowLeft, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 
@@ -56,24 +57,27 @@ export default function CreatorNewPage() {
   async function onSubmit(data: CreatorFormValues) {
     if (!firestore) return;
     
-    try {
-      await addDoc(collection(firestore, 'users', userId, 'creators'), {
-        name: data.name,
-        url: data.url || null,
-      });
+    const creatorsRef = collection(firestore, 'users', userId, 'creators');
+    const newCreator = {
+      name: data.name,
+      url: data.url || null,
+    };
 
-      toast({
-        title: 'Gespeichert!',
-        description: `Designer "${data.name}" wurde erfolgreich erstellt.`,
+    addDoc(creatorsRef, newCreator)
+      .then(() => {
+        toast({
+          title: 'Gespeichert!',
+          description: `Designer "${data.name}" wurde erfolgreich erstellt.`,
+        });
+        router.push(`/creators`);
+      })
+      .catch(async (err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: creatorsRef.path,
+          operation: 'create',
+          requestResourceData: newCreator,
+        }));
       });
-      router.push(`/creators`);
-    } catch (e) {
-      toast({
-        variant: 'destructive',
-        title: 'Fehler',
-        description: 'Der Designer konnte nicht gespeichert werden.',
-      });
-    }
   }
 
   return (

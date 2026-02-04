@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -34,7 +35,7 @@ import {
 import { ArrowLeft, Save, Upload, Trash2, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRef, useState, useMemo } from 'react';
-import { useCollection, useFirestore, useUser } from '@/firebase';
+import { useCollection, useFirestore, useUser, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import type { Category, Fabric, TargetGroup, Creator } from '@/lib/definitions';
 import { useMemoFirebase } from '@/firebase/hooks';
@@ -110,35 +111,33 @@ export default function PatternNewPage() {
     if (!firestore || !userId) return;
 
     const patternCollection = collection(firestore, 'users', userId, 'patterns');
+    const newPattern = {
+      ...data,
+      imageUrl,
+      imageHint,
+      additionalPdfUrls: data.additionalPdfUrls?.map(url => url.value).filter(Boolean) || [],
+    };
     
-    try {
-      await addDoc(patternCollection, {
-        ...data,
-        imageUrl,
-        imageHint,
-        additionalPdfUrls: data.additionalPdfUrls?.map(url => url.value).filter(Boolean),
+    addDoc(patternCollection, newPattern)
+      .then(() => {
+        toast({
+          title: 'Gespeichert!',
+          description: `Schnittmuster "${data.title}" wurde erfolgreich erstellt.`,
+        });
+        router.push(`/patterns`);
+      })
+      .catch(async (err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: patternCollection.path,
+          operation: 'create',
+          requestResourceData: newPattern,
+        }));
       });
-
-      toast({
-        title: 'Gespeichert!',
-        description: `Schnittmuster "${data.title}" wurde erfolgreich erstellt.`,
-      });
-      router.push(`/patterns`);
-    } catch (error) {
-       toast({
-        variant: 'destructive',
-        title: 'Fehler',
-        description: 'Schnittmuster konnte nicht gespeichert werden.',
-      });
-      console.error("Error adding document: ", error);
-    }
   }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, field: any) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real app, you'd upload this file to Firebase Storage and get a URL.
-      // For now, we'll just use the file name as a placeholder.
       field.onChange(file.name);
     }
   };
@@ -146,7 +145,6 @@ export default function PatternNewPage() {
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real app, you'd upload this file to Firebase Storage.
       const reader = new FileReader();
       reader.onload = (e) => {
         setImageUrl(e.target?.result as string);
@@ -227,7 +225,7 @@ export default function PatternNewPage() {
                             <FormItem>
                                 <FormLabel>Beschreibung</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Eine kurze Beschreibung des Schnittmusters..." {...field} />
+                                    <Textarea placeholder="Was möchtest du nähen?" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -293,7 +291,7 @@ export default function PatternNewPage() {
                       render={() => (
                         <FormItem>
                           <FormLabel>Kategorien</FormLabel>
-                          <div className="space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
                             {allCategories.map((item) => (
                               <FormField
                                 key={item.id}
@@ -339,7 +337,7 @@ export default function PatternNewPage() {
                       render={() => (
                         <FormItem>
                           <FormLabel>Stoffempfehlungen</FormLabel>
-                           <div className="space-y-2">
+                           <div className="grid grid-cols-2 gap-2">
                             {allFabrics.map((item) => (
                               <FormField
                                 key={item.id}

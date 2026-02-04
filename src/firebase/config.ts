@@ -23,18 +23,19 @@ export async function getFirebaseConfig() {
     }
   }
 
+  // Fallback to fetching from the server
   promise = fetch('/__firebase/config')
     .then(async (res) => {
       if (!res.ok) {
+        // If the config endpoint is not available, we return a rejected promise
+        // which will be handled by the caller.
         throw new Error(`Failed to fetch Firebase config: ${res.status} ${res.statusText}`);
       }
       const contentType = res.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return res.json();
       }
-      const text = await res.text();
-      console.error("Received non-JSON response from config endpoint. Check if Firebase is provisioned.");
-      throw new Error('Firebase config endpoint did not return JSON. Please ensure Firestore is enabled in your project.');
+      throw new Error('Firebase config endpoint did not return JSON.');
     })
     .catch((err) => {
       console.error("Error loading Firebase config:", err);
