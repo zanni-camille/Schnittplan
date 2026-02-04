@@ -29,16 +29,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Pen, PlusCircle, Trash2, Save, XCircle, Loader2 } from 'lucide-react';
+import { Pen, PlusCircle, Trash2, Save, XCircle, Loader2, Database } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useCollection, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
+import { useCollection, useFirestore, errorEmitter, FirestorePermissionError, useUser } from '@/firebase';
 import { collection, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useMemoFirebase } from '@/firebase/hooks';
 import type { Category, Fabric, TargetGroup } from '@/lib/definitions';
+import { CATEGORIES, FABRICS, TARGET_GROUPS } from '@/lib/placeholder-data';
 
 export default function AdminPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
+  const { user } = useUser();
+  const userId = user?.uid || 'user-1';
 
   const catQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const fabQuery = useMemoFirebase(() => firestore ? collection(firestore, 'fabrics') : null, [firestore]);
@@ -51,14 +54,46 @@ export default function AdminPage() {
   const [newTargetGroup, setNewTargetGroup] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState<string | null>(null);
   const [newFabric, setNewFabric] = useState<string | null>(null);
+  const [isSeeding, setIsSeeding] = useState(false);
 
-  const [editingItem, setEditingItem] = useState<{ id: string, name: string, type: 'cat' | 'fab' | 'tg' } | null>(null);
+  const [editingItem, setEditingItem] = useState<{ id: string, name: string, type: 'categories' | 'fabrics' | 'targetGroups' } | null>(null);
 
-  const isEditing = newTargetGroup !== null || newCategory !== null || newFabric !== null || editingItem !== null;
+  const isEditing = newTargetGroup !== null || newCategory !== null || newFabric !== null || editingItem !== null || isSeeding;
 
   const handleAddNew = (setter: React.Dispatch<React.SetStateAction<string | null>>) => {
     if (isEditing) return;
     setter('');
+  };
+
+  const handleSeedData = async () => {
+    if (!firestore || isSeeding) return;
+    setIsSeeding(true);
+    
+    try {
+      const seed = async (colName: string, items: any[]) => {
+        const colRef = collection(firestore, colName);
+        for (const item of items) {
+          await addDoc(colRef, { name: item.name });
+        }
+      };
+
+      await seed('categories', CATEGORIES);
+      await seed('fabrics', FABRICS);
+      await seed('targetGroups', TARGET_GROUPS);
+
+      toast({
+        title: "Daten initialisiert",
+        description: "Standard-Kategorien, Stoffe und Zielgruppen wurden erstellt.",
+      });
+    } catch (e) {
+      toast({
+        variant: "destructive",
+        title: "Fehler beim Initialisieren",
+        description: "Stelle sicher, dass Firestore im Produktions- oder Testmodus aktiv ist.",
+      });
+    } finally {
+      setIsSeeding(false);
+    }
   };
 
   const handleSaveNew = (collectionName: string, value: string | null, setter: React.Dispatch<React.SetStateAction<string | null>>) => {
@@ -119,7 +154,7 @@ export default function AdminPage() {
       });
   };
 
-  const renderList = (title: string, data: any[] | null, loading: boolean, collectionName: string, newValue: string | null, setNewValue: React.Dispatch<React.SetStateAction<string | null>>) => (
+  const renderList = (title: string, data: any[] | null, loading: boolean, collectionName: 'categories' | 'fabrics' | 'targetGroups', newValue: string | null, setNewValue: React.Dispatch<React.SetStateAction<string | null>>) => (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
@@ -145,7 +180,7 @@ export default function AdminPage() {
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => setEditingItem({ ...item, type: collectionName as any })} disabled={isEditing}><Pen className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => setEditingItem({ ...item, type: collectionName })} disabled={isEditing}><Pen className="h-4 w-4" /></Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost" size="icon" className="text-destructive" disabled={isEditing}><Trash2 className="h-4 w-4" /></Button>
@@ -184,9 +219,15 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">Globale Stammdaten</h1>
-        <p className="text-muted-foreground">Verwalte die Kategorien und Stoffe, die für alle Benutzer sichtbar sind.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Globale Stammdaten</h1>
+          <p className="text-muted-foreground">Verwalte die Kategorien und Stoffe, die für alle Benutzer sichtbar sind.</p>
+        </div>
+        <Button variant="outline" onClick={handleSeedData} disabled={isEditing}>
+          {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+          Testdaten initialisieren
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
