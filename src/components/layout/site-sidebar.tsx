@@ -12,7 +12,7 @@ import {
   SidebarContent
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
-import { LayoutDashboard, FolderKanban, Scissors, Users, Settings, Cog } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Scissors, Users, Settings, Cog, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
@@ -23,6 +23,7 @@ const menuItems = [
 ];
 
 const adminMenuItem = { href: "/admin", label: "Verwaltung", icon: Cog };
+const debugMenuItem = { href: "/debug", label: "Verbindungstest", icon: Wifi };
 
 export function SiteSidebar() {
   const pathname = usePathname();
@@ -72,6 +73,22 @@ export function SiteSidebar() {
       </SidebarContent>
       <SidebarFooter>
          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === debugMenuItem.href}
+                tooltip={{
+                  children: debugMenuItem.label,
+                  className: "font-headline"
+                }}
+                className={cn(pathname === debugMenuItem.href && "text-primary font-bold")}
+              >
+                <Link href={debugMenuItem.href}>
+                  <debugMenuItem.icon />
+                  <span>{debugMenuItem.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton tooltip={{children: "Einstellungen", className: "font-headline"}}>
                     <Settings />
