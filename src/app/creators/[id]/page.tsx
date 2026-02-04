@@ -7,7 +7,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,36 +21,56 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
-import { CREATORS, PATTERNS } from '@/lib/placeholder-data';
 import { ArrowLeft, Pen, Trash2, Globe, Scissors } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
+import { useDoc, useCollection, useFirestore, useUser } from '@/firebase';
+import { doc, deleteDoc, collection, query, where } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
+import type { Creator, Pattern } from '@/lib/definitions';
 
 export default function CreatorDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const userId = user?.uid || 'user-1';
   const id = params.id as string;
 
-  const creator = CREATORS.find((p) => p.id === id);
+  const creatorRef = useMemoFirebase(() => 
+    firestore ? doc(firestore, 'users', userId, 'creators', id) : null
+  , [firestore, userId, id]);
+  const { data: creator, loading: creatorLoading } = useDoc<Creator>(creatorRef);
+
+  const patternsQuery = useMemoFirebase(() => 
+    firestore ? query(collection(firestore, 'users', userId, 'patterns'), where('creatorId', '==', id)) : null
+  , [firestore, userId, id]);
+  const { data: relatedPatterns } = useCollection<Pattern>(patternsQuery);
   
-  if (!creator) {
-    notFound();
-  }
+  if (creatorLoading) return <div className="p-8 text-center">Wird geladen...</div>;
+  if (!creator) notFound();
 
-  const relatedPatterns = PATTERNS.filter(p => p.creatorId === creator.id);
-
-  const handleDelete = () => {
-    console.log(`Deleting creator ${creator.id}`);
-    toast({
-      title: 'Designer gelöscht',
-      description: `"${creator.name}" wurde erfolgreich entfernt.`,
-    });
-    router.push('/creators');
+  const handleDelete = async () => {
+    if (!creatorRef) return;
+    try {
+      await deleteDoc(creatorRef);
+      toast({
+        title: 'Designer gelöscht',
+        description: `"${creator.name}" wurde erfolgreich entfernt.`,
+      });
+      router.push('/creators');
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Löschen fehlgeschlagen.',
+      });
+    }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
        <div className="flex items-center justify-between">
          <Button asChild variant="ghost">
             <Link href="/creators">
@@ -112,7 +131,7 @@ export default function CreatorDetailPage() {
           <Scissors />
           Schnittmuster von {creator.name}
         </h2>
-        {relatedPatterns.length > 0 ? (
+        {relatedPatterns && relatedPatterns.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {relatedPatterns.map((pattern) => (
                 <Card key={pattern.id} className="overflow-hidden transition-transform hover:scale-105 hover:shadow-lg group">
@@ -136,7 +155,9 @@ export default function CreatorDetailPage() {
               ))}
             </div>
         ) : (
-          <p className="text-muted-foreground">Von diesem Designer sind keine Schnittmuster in deiner Bibliothek.</p>
+          <div className="text-center py-12 border-2 border-dashed rounded-lg bg-muted/20">
+            <p className="text-muted-foreground">Von diesem Designer sind noch keine Schnittmuster in deiner Bibliothek.</p>
+          </div>
         )}
       </section>
     </div>

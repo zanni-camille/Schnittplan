@@ -49,7 +49,7 @@ export default function ProjectsPage() {
   }, [projects, filter]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight font-headline">Meine Projekte</h1>
@@ -69,9 +69,11 @@ export default function ProjectsPage() {
               <SelectItem value="finished">Fertiggestellt</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="default">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Neues Projekt
+          <Button asChild>
+            <Link href="/projects/new">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Neues Projekt
+            </Link>
           </Button>
         </div>
       </div>
@@ -110,11 +112,13 @@ export default function ProjectsPage() {
           ))}
         </div>
       ) : (
-        <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center">
+        <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center bg-muted/10">
           <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold">Keine Projekte gefunden</h3>
           <p className="text-muted-foreground mb-4">Du hast noch keine Projekte in dieser Kategorie.</p>
-          <Button variant="outline">Projekt erstellen</Button>
+          <Button variant="outline" asChild>
+            <Link href="/projects/new">Erstes Projekt erstellen</Link>
+          </Button>
         </Card>
       )}
     </div>

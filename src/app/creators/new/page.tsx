@@ -25,6 +25,8 @@ import {
 import { ArrowLeft, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 
 const creatorFormSchema = z.object({
@@ -37,6 +39,9 @@ type CreatorFormValues = z.infer<typeof creatorFormSchema>;
 export default function CreatorNewPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const userId = user?.uid || 'user-1';
 
   const form = useForm<CreatorFormValues>({
     resolver: zodResolver(creatorFormSchema),
@@ -48,14 +53,27 @@ export default function CreatorNewPage() {
 
   const creatorName = form.watch('name');
 
-  function onSubmit(data: CreatorFormValues) {
-    const newId = `cre-${Date.now()}`;
-    console.log("Creating new creator:", { id: newId, ...data });
-    toast({
-      title: 'Gespeichert!',
-      description: `Designer "${data.name}" wurde erfolgreich erstellt.`,
-    });
-    router.push(`/creators`);
+  async function onSubmit(data: CreatorFormValues) {
+    if (!firestore) return;
+    
+    try {
+      await addDoc(collection(firestore, 'users', userId, 'creators'), {
+        name: data.name,
+        url: data.url || null,
+      });
+
+      toast({
+        title: 'Gespeichert!',
+        description: `Designer "${data.name}" wurde erfolgreich erstellt.`,
+      });
+      router.push(`/creators`);
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Der Designer konnte nicht gespeichert werden.',
+      });
+    }
   }
 
   return (

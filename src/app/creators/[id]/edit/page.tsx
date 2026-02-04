@@ -22,10 +22,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { CREATORS } from '@/lib/placeholder-data';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useDoc, useFirestore, useUser } from '@/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
+import type { Creator } from '@/lib/definitions';
+import { useEffect } from 'react';
 
 
 const creatorFormSchema = z.object({
@@ -38,29 +42,58 @@ type CreatorFormValues = z.infer<typeof creatorFormSchema>;
 export default function CreatorEditPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const userId = user?.uid || 'user-1';
+  const id = params.id as string;
 
-  const creator = CREATORS.find((p) => p.id === id);
+  const creatorRef = useMemoFirebase(() => 
+    firestore ? doc(firestore, 'users', userId, 'creators', id) : null
+  , [firestore, userId, id]);
+  const { data: creator, loading: creatorLoading } = useDoc<Creator>(creatorRef);
 
   const form = useForm<CreatorFormValues>({
     resolver: zodResolver(creatorFormSchema),
-    defaultValues: creator,
+    defaultValues: {
+      name: '',
+      url: '',
+    },
   });
+
+  useEffect(() => {
+    if (creator) {
+      form.reset({
+        name: creator.name,
+        url: creator.url || '',
+      });
+    }
+  }, [creator, form]);
   
-  if (!creator) {
-    notFound();
-  }
+  if (creatorLoading) return <div className="p-8 text-center">Wird geladen...</div>;
+  if (!creator) notFound();
   
   const creatorName = form.watch('name');
 
-  function onSubmit(data: CreatorFormValues) {
-    toast({
-      title: 'Gespeichert!',
-      description: `Designer "${data.name}" wurde erfolgreich aktualisiert.`,
-    });
-    console.log(data);
-    router.push(`/creators/${id}`);
+  async function onSubmit(data: CreatorFormValues) {
+    if (!creatorRef) return;
+    try {
+      await updateDoc(creatorRef, {
+        name: data.name,
+        url: data.url || null,
+      });
+      toast({
+        title: 'Gespeichert!',
+        description: `Designer "${data.name}" wurde erfolgreich aktualisiert.`,
+      });
+      router.push(`/creators/${id}`);
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Update fehlgeschlagen.',
+      });
+    }
   }
 
   return (

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { PROJECTS, PATTERNS } from '@/lib/placeholder-data';
 import { ArrowLeft, Pen, Trash2, Scissors, CalendarCheck } from 'lucide-react';
 import {
   AlertDialog,
@@ -32,37 +31,59 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
+} from "@/carousel"
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { useDoc, useCollection, useFirestore, useUser } from '@/firebase';
+import { doc, deleteDoc, collection, query, where } from 'firebase/firestore';
+import { useMemoFirebase } from '@/firebase/hooks';
+import type { Project, Pattern } from '@/lib/definitions';
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { id } = params;
+  const firestore = useFirestore();
+  const { user } = useUser();
+  const userId = user?.uid || 'user-1';
+  const id = params.id as string;
 
-  const project = PROJECTS.find((p) => p.id === id);
+  const projectRef = useMemoFirebase(() => 
+    firestore ? doc(firestore, 'users', userId, 'projects', id) : null
+  , [firestore, userId, id]);
+  const { data: project, loading: projectLoading } = useDoc<Project>(projectRef);
 
-  if (!project) {
-    notFound();
-  }
+  const patternsQuery = useMemoFirebase(() => 
+    firestore && project?.patternIds?.length 
+      ? query(collection(firestore, 'users', userId, 'patterns'), where('id', 'in', project.patternIds)) 
+      : null
+  , [firestore, userId, project?.patternIds]);
+  const { data: relatedPatterns } = useCollection<Pattern>(patternsQuery);
 
-  const handleDelete = () => {
-    console.log(`Deleting project ${project.id}`);
-    toast({
-      title: 'Projekt gelöscht',
-      description: `"${project.name}" wurde erfolgreich entfernt.`,
-    });
-    router.push('/projects');
+  if (projectLoading) return <div className="p-8 text-center">Wird geladen...</div>;
+  if (!project) notFound();
+
+  const handleDelete = async () => {
+    if (!projectRef) return;
+    try {
+      await deleteDoc(projectRef);
+      toast({
+        title: 'Projekt gelöscht',
+        description: `"${project.name}" wurde erfolgreich entfernt.`,
+      });
+      router.push('/projects');
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Löschen fehlgeschlagen.',
+      });
+    }
   };
 
-  const relatedPatterns = PATTERNS.filter(pattern => project.patternIds.includes(pattern.id));
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
          <Button asChild variant="ghost">
             <Link href="/projects">
@@ -104,7 +125,7 @@ export default function ProjectDetailPage() {
       
       <div className="grid md:grid-cols-3 gap-8 items-start">
         <div className="md:col-span-1 space-y-6">
-          {project.imageUrls && project.imageUrls.length > 0 && (
+          {project.imageUrls && project.imageUrls.length > 0 ? (
             <Carousel className="w-full">
               <CarouselContent>
                 {project.imageUrls.map((url, index) => (
@@ -116,7 +137,6 @@ export default function ProjectDetailPage() {
                           alt={`${project.name} - Bild ${index + 1}`}
                           fill
                           className="object-cover"
-                          data-ai-hint={project.imageHints?.[index]}
                         />
                       </div>
                     </Card>
@@ -130,6 +150,10 @@ export default function ProjectDetailPage() {
                 </>
               )}
             </Carousel>
+          ) : (
+             <Card className="aspect-video flex items-center justify-center bg-muted/20 border-dashed">
+                <p className="text-muted-foreground text-sm">Keine Projektbilder</p>
+             </Card>
           )}
           {project.completionDates && project.completionDates.length > 0 && (
             <Card>
@@ -155,7 +179,7 @@ export default function ProjectDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle className="font-headline text-4xl">{project.name}</CardTitle>
-              <CardDescription className="text-lg">{project.description}</CardDescription>
+              <CardDescription className="text-lg">{project.description || 'Keine Beschreibung vorhanden.'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -170,7 +194,7 @@ export default function ProjectDetailPage() {
               <Scissors />
               Zugehörige Schnittmuster
             </h2>
-            {relatedPatterns.length > 0 ? (
+            {relatedPatterns && relatedPatterns.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {relatedPatterns.map((pattern) => (
                   <Card key={pattern.id} className="overflow-hidden group transition-shadow hover:shadow-xl">
@@ -182,7 +206,6 @@ export default function ProjectDetailPage() {
                             alt={pattern.title}
                             fill
                             className="object-cover transition-transform group-hover:scale-105"
-                            data-ai-hint={pattern.imageHint}
                           />
                         </div>
                       </CardContent>
@@ -194,7 +217,9 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground">Diesem Projekt sind keine Schnittmuster zugeordnet.</p>
+              <div className="text-center py-8 border rounded-lg bg-muted/5">
+                <p className="text-muted-foreground">Diesem Projekt sind noch keine Schnittmuster zugeordnet.</p>
+              </div>
             )}
           </section>
         </div>
