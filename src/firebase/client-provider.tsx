@@ -44,7 +44,7 @@ export function FirebaseClientProvider({
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground font-headline text-xl">SchnittPlan wird geladen...</p>
+        <p className="text-muted-foreground font-headline text-xl">Verbindung zur Datenbank wird hergestellt...</p>
       </div>
     );
   }
@@ -65,14 +65,14 @@ export function FirebaseClientProvider({
                 <div className="max-w-2xl mx-auto mt-8">
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Datenbank-Verbindung fehlgeschlagen</AlertTitle>
+                    <AlertTitle>Konfigurationsfehler</AlertTitle>
                     <AlertDescription>
-                      <p className="mb-2">Die App konnte keine Verbindung zur Cloud-Datenbank herstellen.</p>
+                      <p className="mb-2">Die Firebase-Datenbank konnte nicht initialisiert werden.</p>
                       <code className="text-xs bg-destructive/10 p-2 rounded block overflow-auto">
                         {error.message}
                       </code>
-                      <p className="mt-4 text-sm italic">
-                        Hinweis: Stellen Sie sicher, dass Ihr Firebase-Projekt korrekt konfiguriert ist.
+                      <p className="mt-4 text-sm">
+                        Bitte stelle sicher, dass <strong>Firestore</strong> in deinem Firebase-Projekt aktiviert wurde.
                       </p>
                     </AlertDescription>
                   </Alert>

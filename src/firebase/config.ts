@@ -33,8 +33,8 @@ export async function getFirebaseConfig() {
         return res.json();
       }
       const text = await res.text();
-      console.error("Received non-JSON response from config endpoint:", text.substring(0, 100));
-      throw new Error('Firebase config endpoint did not return JSON. Please check if Firebase is correctly configured.');
+      console.error("Received non-JSON response from config endpoint. Check if Firebase is provisioned.");
+      throw new Error('Firebase config endpoint did not return JSON. Please ensure Firestore is enabled in your project.');
     })
     .catch((err) => {
       console.error("Error loading Firebase config:", err);
