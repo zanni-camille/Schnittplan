@@ -27,13 +27,13 @@ export async function getFirebaseConfig() {
   promise = fetch('/__firebase/config')
     .then(async (res) => {
       if (!res.ok) {
-        throw new Error(`Failed to fetch Firebase config: ${res.status} ${res.statusText}`);
+        throw new Error(`Konfiguration nicht gefunden (Status ${res.status}). Bitte stelle sicher, dass das Firebase-Projekt verknüpft ist.`);
       }
       const contentType = res.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return res.json();
       }
-      throw new Error('Firebase config endpoint did not return JSON.');
+      throw new Error('Der Konfigurations-Endpunkt hat kein gültiges JSON zurückgegeben.');
     })
     .catch((err) => {
       console.error("Error loading Firebase config:", err);

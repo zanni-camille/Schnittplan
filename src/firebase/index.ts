@@ -36,6 +36,9 @@ export async function initializeFirebase(): Promise<{
 }> {
   try {
     const config = await getFirebaseConfig();
+    if (!config || !config.apiKey) {
+      throw new Error("Ungültige Firebase-Konfiguration erhalten.");
+    }
     const apps = getApps();
     const app = apps.length > 0 ? apps[0] : initializeApp(config);
     const auth = getAuth(app);
